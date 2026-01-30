@@ -1,7 +1,11 @@
 
-import { StyleSheet } from "react-native";
+import { StyleSheet, Dimensions } from "react-native";
+
+const { width } = Dimensions.get("window");
+const isMobile = width < 768;
 
 export default StyleSheet.create({
+  
    container: {
     flex: 1,
     backgroundColor: "#f9fafb",
@@ -37,6 +41,13 @@ export default StyleSheet.create({
     backgroundColor: "#15803d",
     justifyContent: "center",
     alignItems: "center",
+  },
+  logoImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    overflow: 'hidden',
+    resizeMode: 'cover',
   },
   logoText: {
     color: "#ffffff",
@@ -115,297 +126,232 @@ export default StyleSheet.create({
     paddingTop: 32,
   },
 
-  // Stats Grid
-  statsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 24,
-    marginBottom: 32,
-  },
-  statsGridMobile: {
-    gap: 16,
-  },
-  statCard: {
-    flex: 1,
-    minWidth: 200,
+  
+  // Map styles
+  mapContainer: {
+    height: 520,
     backgroundColor: "#ffffff",
     borderWidth: 1,
     borderColor: "#e5e7eb",
-    padding: 24,
+    marginBottom: 32,
   },
-  statCardMobile: {
-    minWidth: "100%",
-    padding: 20,
+  map: {
+    flex: 1,
   },
-  statHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 12,
-  },
-  statIcon: {
-    width: 48,
-    height: 48,
-    backgroundColor: "#f0fdf4",
-    borderWidth: 1,
-    borderColor: "#bbf7d0",
+  mapLoading: {
+    flex: 1,
+    height: 520,
     justifyContent: "center",
     alignItems: "center",
   },
-  statIconText: {
-    fontSize: 24,
-  },
-  changeBadge: {
-    backgroundColor: "#f0fdf4",
-    borderWidth: 1,
-    borderColor: "#bbf7d0",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  changeBadgeText: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: "#15803d",
-  },
-  statValue: {
-    fontSize: 30,
-    fontWeight: "bold",
-    color: "#111827",
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 14,
+  mapLoadingText: {
+    marginTop: 12,
     color: "#6b7280",
   },
-
-  // Content Grid
-  contentGrid: {
+  mapPlaceholder: {
+    height: 520,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  mapPlaceholderText: {
+    fontSize: 16,
+    color: "#6b7280",
+    marginBottom: 12,
+  },
+  mapLink: {
+    color: "#1e40af",
+    fontWeight: "600",
+  },
+  mapControls: {
+    flexDirection: isMobile ? "column" : "row",
+    justifyContent: "space-between",
+    alignItems: isMobile ? "flex-start" : "center",
+    marginBottom: 16,
+  },
+  mapTitleSection: {
+    marginBottom: isMobile ? 12 : 0,
+  },
+  mapTitle: {
+    fontSize: isMobile ? 20 : 24,
+    fontWeight: "700",
+    color: "#1a472a",
+    marginBottom: 4,
+  },
+  mapSubtitle: {
+    fontSize: isMobile ? 14 : 16,
+    color: "#6b7280",
+    opacity: 0.8,
+  },
+  controlButtons: {
     flexDirection: "row",
-    gap: 32,
+    gap: 8,
   },
-  contentGridMobile: {
-    flexDirection: "column",
-    gap: 24,
-  },
-
-  // Recent Scans
-  recentScans: {
-    flex: 2,
-    backgroundColor: "#ffffff",
+  controlButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: "#f8fafc",
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
+    borderColor: "#e2e8f0",
   },
-  recentScansMobile: {
-    flex: 1,
+  controlButtonActive: {
+    backgroundColor: "#15803d",
+    borderColor: "#15803d",
   },
-  sectionHeader: {
+  controlButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#334155",
+  },
+  controlButtonActiveText: {
+    color: "#ffffff",
+  },
+  
+  mapLegend: {
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  legendTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1a472a",
+    marginBottom: 12,
+  },
+  legendItems: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  legendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  legendColor: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    marginRight: 8,
+  },
+  legendText: {
+    fontSize: 12,
+    color: "#334155",
+  },
+  
+  regionDetail: {
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    padding: 20,
+    marginTop: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  regionDetailHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
+    marginBottom: 16,
+  },
+  regionDetailTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1a472a",
+  },
+  closeButton: {
+    fontSize: 20,
+    color: "#94a3b8",
+    padding: 4,
+  },
+  regionStats: {
+    flexDirection: isMobile ? "column" : "row",
+    justifyContent: "space-between",
+    gap: isMobile ? 12 : 16,
+  },
+  statItem: {
+    flex: 1,
+    alignItems: "center",
+    padding: 12,
+    backgroundColor: "#f8fafc",
+    borderRadius: 8,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: "#64748b",
+    marginBottom: 4,
+  },
+  statValue: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1e293b",
+  },
+  
+  topProducers: {
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    padding: 20,
+    marginTop: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#111827",
-  },
-  viewAllButton: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#15803d",
-  },
-
-  // Table
-  tableHeader: {
-    flexDirection: "row",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    backgroundColor: "#f9fafb",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
-  },
-  tableHeaderText: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#6b7280",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  tableRow: {
-    flexDirection: "row",
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    alignItems: "center",
-  },
-  tableRowBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#f3f4f6",
-  },
-  tableCell: {
-    fontSize: 14,
-    color: "#111827",
-  },
-  tableCellBold: {
-    fontWeight: "500",
-  },
-  col1: { flex: 1 },
-  col2: { flex: 1 },
-  col3: { flex: 0.8, textAlign: "center" },
-  col4: { flex: 1, textAlign: "right" },
-  
-  qualityBadge: {
-    alignSelf: "flex-start",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderWidth: 1,
-  },
-  qualityText: {
-    fontSize: 11,
-    fontWeight: "600",
-  },
-  qualityPremium: {
-    backgroundColor: "#dcfce7",
-    borderColor: "#86efac",
-    color: "#166534",
-  },
-  qualityGood: {
-    backgroundColor: "#dbeafe",
-    borderColor: "#93c5fd",
-    color: "#1e40af",
-  },
-  qualityFair: {
-    backgroundColor: "#fef3c7",
-    borderColor: "#fcd34d",
-    color: "#92400e",
-  },
-  qualityDefault: {
-    backgroundColor: "#f3f4f6",
-    borderColor: "#d1d5db",
-    color: "#374151",
-  },
-  scoreText: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  statusText: {
-    fontSize: 14,
-    color: "#6b7280",
-  },
-
-  // Action Buttons
-  actionButtons: {
-    flexDirection: "row",
-    gap: 16,
-    padding: 24,
-  },
-  actionButton: {
-    flex: 1,
-    backgroundColor: "#ffffff",
-    borderWidth: 2,
-    borderColor: "#d1d5db",
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    alignItems: "center",
-  },
-  actionButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#374151",
-  },
-
-  // Sidebar
-  sidebar: {
-    flex: 1,
-    gap: 24,
-  },
-  sidebarMobile: {
-    flex: 1,
-  },
-
-  // Quick Actions
-  quickActions: {
-    backgroundColor: "#ffffff",
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    padding: 24,
-  },
-  sidebarTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#111827",
+    fontWeight: "700",
+    color: "#1a472a",
     marginBottom: 16,
   },
-  primaryAction: {
-    backgroundColor: "#15803d",
-    padding: 12,
+  producersList: {
+    gap: 12,
+  },
+  producerItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    marginBottom: 12,
+    paddingVertical: 8,
   },
-  secondaryAction: {
-    backgroundColor: "#ffffff",
-    borderWidth: 1,
-    borderColor: "#d1d5db",
-    padding: 12,
-    flexDirection: "row",
+  rankBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#f59e0b",
+    justifyContent: "center",
     alignItems: "center",
-    gap: 12,
-    marginBottom: 12,
+    marginRight: 12,
   },
-  actionIcon: {
-    fontSize: 20,
+  rankText: {
+    color: "#ffffff",
+    fontWeight: "700",
+    fontSize: 14,
   },
-  actionContent: {
+  producerInfo: {
     flex: 1,
   },
-  actionTitle: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#ffffff",
-  },
-  actionSubtitle: {
-    fontSize: 11,
-    color: "#dcfce7",
-  },
-  actionTitleSecondary: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#374151",
-  },
-  actionSubtitleSecondary: {
-    fontSize: 11,
-    color: "#6b7280",
-  },
-
-  // System Status
-  systemStatus: {
-    backgroundColor: "#f0fdf4",
-    borderWidth: 1,
-    borderColor: "#bbf7d0",
-    padding: 24,
-  },
-  systemStatusTitle: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#166534",
-    marginBottom: 12,
-  },
-  statusRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 8,
-  },
-  statusLabel: {
-    fontSize: 14,
-    color: "#15803d",
-  },
-  statusValue: {
-    fontSize: 14,
+  producerName: {
+    fontSize: 16,
     fontWeight: "600",
-    color: "#166534",
+    color: "#1e293b",
+    marginBottom: 2,
+  },
+  producerProduction: {
+    fontSize: 14,
+    color: "#64748b",
+  },
+  productionIndicator: {
+    height: 4,
+    borderRadius: 2,
+    marginLeft: 12,
+    maxWidth: 100,
   },
 });
