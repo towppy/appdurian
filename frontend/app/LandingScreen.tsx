@@ -39,8 +39,10 @@ export default function Landing() {
   const isSmallScreen = width < 375;
 
   const styles = useLandingStyles();
-  const flatListRef = useRef<FlatList>(null);
+  const scrollRef = useRef<ScrollView | null>(null);
+  const flatListRef = useRef<FlatList<any> | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [anchors, setAnchors] = useState({ home: 0, about: 0, services: 0, contact: 0 });
 
   const carouselData = [
     {
@@ -371,10 +373,20 @@ export default function Landing() {
     intervalRef.current = setInterval(() => {
       setCurrentIndex((prevIndex) => {
         const nextIndex = prevIndex === carouselData.length - 1 ? 0 : prevIndex + 1;
-        flatListRef.current?.scrollToIndex({
-          index: nextIndex,
-          animated: true,
-        });
+        try {
+          if (flatListRef.current?.scrollToIndex) {
+            flatListRef.current.scrollToIndex({ index: nextIndex, animated: true });
+          } else if (flatListRef.current?.scrollToOffset) {
+            flatListRef.current.scrollToOffset({ offset: nextIndex * width, animated: true });
+          }
+        } catch (e) {
+          // Fallback if measurement isn't available yet
+          try {
+            flatListRef.current?.scrollToOffset({ offset: nextIndex * width, animated: true });
+          } catch (err) {
+            console.warn('Carousel scroll error:', err);
+          }
+        }
         return nextIndex;
       });
     }, 4000) as any;
@@ -390,11 +402,12 @@ export default function Landing() {
   useEffect(() => {
     startAutoScroll();
     return () => stopAutoScroll();
-  }, []);
+  }, [width]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
+        ref={scrollRef}
         style={styles.container}
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
@@ -434,16 +447,16 @@ export default function Landing() {
         <View style={styles.nav}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={styles.navScroll}>
-              <TouchableOpacity style={styles.navItem}>
+              <TouchableOpacity style={styles.navItem} onPress={() => scrollRef.current?.scrollTo({ y: anchors.home, animated: true })}>
                 <Text style={styles.navText}>Home</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.navItem}>
+              <TouchableOpacity style={styles.navItem} onPress={() => scrollRef.current?.scrollTo({ y: anchors.about, animated: true })}>
                 <Text style={styles.navText}>About Us</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.navItem}>
+              <TouchableOpacity style={styles.navItem} onPress={() => scrollRef.current?.scrollTo({ y: anchors.services, animated: true })}>
                 <Text style={styles.navText}>Services</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.navItem}>
+              <TouchableOpacity style={styles.navItem} onPress={() => scrollRef.current?.scrollTo({ y: anchors.contact, animated: true })}>
                 <Text style={styles.navText}>Contact</Text>
               </TouchableOpacity>
             </View>
@@ -451,7 +464,7 @@ export default function Landing() {
         </View>
 
         {/* HERO CAROUSEL SECTION */}
-        <View style={styles.heroSection}>
+        <View style={styles.heroSection} onLayout={(e) => { const y = e.nativeEvent?.layout?.y ?? 0; setAnchors(prev => ({ ...prev, home: y })); }}>
           <View style={styles.heroContent}>
             <FlatList
               ref={flatListRef}
@@ -478,6 +491,11 @@ export default function Landing() {
                 startAutoScroll();
               }}
               scrollEventThrottle={16}
+              // Improve reliability for scrollToIndex and nested scrolling
+              getItemLayout={(_, index) => ({ length: width, offset: width * index, index })}
+              nestedScrollEnabled={true}
+              directionalLockEnabled={true}
+              initialNumToRender={1}
             />
 
             {/* Carousel Indicators */}
@@ -525,32 +543,9 @@ export default function Landing() {
           </View>
         </View>
 
-        {/* INFO CARDS SECTION */}
-        <View style={styles.infoCardsSection}>
-          <View style={styles.infoCardsGrid}>
-            <View style={styles.infoCard}>
-              <Text style={styles.infoCardTitle}>Fast Analysis</Text>
-              <Text style={styles.infoCardText}>
-                Get instant AI-powered quality assessment in seconds
-              </Text>
-            </View>
-            <View style={styles.infoCard}>
-              <Text style={styles.infoCardTitle}>Early Detection</Text>
-              <Text style={styles.infoCardText}>
-                Identify damage and disease before it spreads
-              </Text>
-            </View>
-            <View style={styles.infoCard}>
-              <Text style={styles.infoCardTitle}>Export Ready</Text>
-              <Text style={styles.infoCardText}>
-                Meet international quality standards with confidence
-              </Text>
-            </View>
-          </View>
-        </View>
 
         {/* FEATURES SECTION */}
-        <View style={styles.infoSection}>
+        <View style={styles.infoSection} onLayout={(e) => { const y = e.nativeEvent?.layout?.y ?? 0; setAnchors(prev => ({ ...prev, about: y })); }}>
           <Text style={styles.sectionTitle}>Why Choose Durianostics?</Text>
 
           <View style={styles.featureBlock}>
@@ -584,8 +579,9 @@ export default function Landing() {
           </View>
         </View>
 
+
         {/* FACTS SECTION */}
-        <View style={styles.factsSection}>
+        <View style={styles.factsSection}onLayout={(e) => { const y = e.nativeEvent?.layout?.y ?? 0; setAnchors(prev => ({ ...prev, services: y })); }}>
           <Text style={styles.factsTitle}>Did You Know?</Text>
           
           <View style={styles.factCard}>
@@ -627,6 +623,12 @@ export default function Landing() {
               The Philippines is famous for the "Puyat" durian, known for its sweet, creamy taste and milder odor compared to other varieties.
             </Text>
           </View>
+        </View>
+
+        {/* CONTACT SECTION */}
+        <View style={styles.contactSection} onLayout={(e) => { const y = e.nativeEvent?.layout?.y ?? 0; setAnchors(prev => ({ ...prev, contact: y })); }}>
+          <Text style={styles.contactTitle}>Contact Us</Text>
+          <Text style={styles.contactText}>Email: support@durianostics.example • Phone: +1 555-1234</Text>
         </View>
 
       </ScrollView>

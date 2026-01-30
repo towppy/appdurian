@@ -1,12 +1,19 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform, Dimensions } from 'react-native';
 
-// Design tokens for consistency
+const { width } = Dimensions.get('window');
+const isSmallScreen = width < 375;
+
+/* =====================
+   Design Tokens
+===================== */
 const COLORS = {
   primary: '#27AE60',
-  primaryDark: '#2e7d32',
+  primaryDark: '#1b5e20',
   white: '#FFFFFF',
   border: '#E0E0E0',
-  overlay: 'rgba(0, 0, 0, 0.5)',
+  black: '#000000',
+  text: '#333333',
+  gray: '#6b7280',
 } as const;
 
 const SPACING = {
@@ -19,111 +26,312 @@ const SPACING = {
   xxxl: 40,
 } as const;
 
-const BORDER_RADIUS = {
-  sm: 8,
-  md: 12,
-  lg: 30,
-} as const;
+/* =====================
+   Platform-specific Shadows
+===================== */
+const createShadow = (elevation: number) => {
+  if (Platform.OS === 'ios') {
+    return {
+      shadowColor: COLORS.black,
+      shadowOffset: { width: 0, height: elevation / 2 },
+      shadowOpacity: 0.15,
+      shadowRadius: elevation,
+    };
+  } else if (Platform.OS === 'android') {
+    return {
+      elevation,
+    };
+  } else {
+    // Web
+    return {
+      boxShadow: `0 ${elevation / 2}px ${elevation}px rgba(0, 0, 0, 0.15)`,
+    };
+  }
+};
 
-const styles = StyleSheet.create({
-  // Layout
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+/* =====================
+   Styles Hook
+===================== */
+export const useScannerStyles = () => {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: COLORS.black,
+      position: 'relative',
+    },
 
-  // Buttons
-  button: {
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.lg,
-    backgroundColor: COLORS.primaryDark,
-    borderRadius: BORDER_RADIUS.sm,
-    marginTop: SPACING.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
+    camera: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      width: '100%',
+      height: '100%',
+    },
 
-  buttonText: {
-    color: COLORS.white,
-    fontWeight: '600',
-    fontSize: 16,
-    textAlign: 'center',
-  },
+    overlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 10,
+    },
 
-  backButton: {
-    position: 'absolute',
-    top: SPACING.xxxl,
-    left: SPACING.xl,
-    backgroundColor: COLORS.white,
-    paddingVertical: SPACING.xs,
-    paddingHorizontal: SPACING.md,
-    borderRadius: BORDER_RADIUS.sm,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 3,
-    elevation: 4,
-  },
+    /* =====================
+       Permission States
+    ===================== */
+    center: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: COLORS.black,
+      padding: SPACING.xl,
+    },
 
-  backText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
+    permissionText: {
+      color: COLORS.white,
+      fontSize: isSmallScreen ? 16 : 18,
+      marginBottom: SPACING.lg,
+      textAlign: 'center',
+      fontWeight: '500',
+      letterSpacing: 0.3,
+    },
 
-  captureButton: {
-    position: 'absolute',
-    bottom: SPACING.xxxl,
-    alignSelf: 'center',
-    backgroundColor: COLORS.primary,
-    paddingVertical: 16,
-    paddingHorizontal: SPACING.xxl,
-    borderRadius: BORDER_RADIUS.lg,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 6,
-    minWidth: 140,
-  },
+    button: {
+      paddingVertical: isSmallScreen ? 12 : SPACING.md,
+      paddingHorizontal: isSmallScreen ? 20 : SPACING.xxl,
+      backgroundColor: COLORS.primaryDark,
+      borderRadius: 12,
+      ...createShadow(4),
+      ...(Platform.OS === 'web' && {
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+      }),
+    },
 
-  captureText: {
-    color: COLORS.white,
-    fontWeight: '700',
-    fontSize: 16,
-    textAlign: 'center',
-    letterSpacing: 0.5,
-  },
+    buttonText: {
+      color: COLORS.white,
+      fontSize: isSmallScreen ? 15 : 16,
+      fontWeight: '700',
+      letterSpacing: 0.5,
+    },
 
-  // Preview
-  previewContainer: {
-    position: 'absolute',
-    bottom: 110,
-    left: SPACING.xl,
-    width: 120,
-    height: 160,
-    borderRadius: BORDER_RADIUS.md,
-    overflow: 'hidden',
-    borderWidth: 2,
-    borderColor: COLORS.border,
-    backgroundColor: COLORS.white,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 5,
-    elevation: 5,
-  },
+    /* =====================
+       Back Button
+    ===================== */
+    backButton: {
+      position: 'absolute',
+      top: Platform.OS === 'ios' ? 56 : SPACING.xxxl,
+      left: SPACING.xl,
+      backgroundColor: COLORS.white,
+      paddingVertical: SPACING.sm,
+      paddingHorizontal: SPACING.lg,
+      borderRadius: 12,
+      flexDirection: 'row',
+      alignItems: 'center',
+      ...createShadow(6),
+      ...(Platform.OS === 'web' && {
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+      }),
+    },
 
-  previewImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-});
+    backText: {
+      fontSize: isSmallScreen ? 15 : 16,
+      fontWeight: '700',
+      color: COLORS.text,
+      letterSpacing: 0.3,
+    },
 
-export default styles;
-export { COLORS, SPACING, BORDER_RADIUS };
+    /* =====================
+       Capture Button
+    ===================== */
+    captureButton: {
+      position: 'absolute',
+      bottom: Platform.OS === 'ios' ? 56 : SPACING.xxxl,
+      alignSelf: 'center',
+      left: 0,
+      right: 0,
+      marginHorizontal: 'auto',
+      backgroundColor: COLORS.primary,
+      paddingVertical: isSmallScreen ? 14 : 16,
+      paddingHorizontal: SPACING.xxl,
+      borderRadius: 30,
+      minWidth: isSmallScreen ? 140 : 180,
+      maxWidth: 220,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 3,
+      borderColor: COLORS.white,
+      ...createShadow(8),
+      ...(Platform.OS === 'web' && {
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+      }),
+    },
+
+    captureText: {
+      color: COLORS.white,
+      fontSize: isSmallScreen ? 15 : 16,
+      fontWeight: '700',
+      textAlign: 'center',
+      letterSpacing: 0.5,
+    },
+
+    /* =====================
+       Preview Container
+    ===================== */
+    previewContainer: {
+      position: 'absolute',
+      bottom: Platform.OS === 'ios' ? 140 : 120,
+      left: SPACING.xl,
+      width: isSmallScreen ? 100 : 120,
+      height: isSmallScreen ? 140 : 160,
+      borderRadius: 16,
+      overflow: 'hidden',
+      borderWidth: 3,
+      borderColor: COLORS.primary,
+      backgroundColor: COLORS.white,
+      ...createShadow(8),
+    },
+
+    previewImage: {
+      width: '100%',
+      height: '100%',
+      resizeMode: 'cover',
+    },
+
+    /* =====================
+       AR Scan Overlay
+    ===================== */
+    scanOverlay: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingTop: Platform.OS === 'ios' ? 100 : 80,
+      paddingBottom: 200,
+    },
+
+    scanFrame: {
+      width: isSmallScreen ? 280 : 320,
+      height: isSmallScreen ? 280 : 320,
+      position: 'relative',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+
+    /* Corner Markers */
+    corner: {
+      position: 'absolute',
+      width: 40,
+      height: 40,
+      borderColor: COLORS.primary,
+      borderWidth: 4,
+    },
+
+    cornerTopLeft: {
+      top: 0,
+      left: 0,
+      borderRightWidth: 0,
+      borderBottomWidth: 0,
+      borderTopLeftRadius: 8,
+    },
+
+    cornerTopRight: {
+      top: 0,
+      right: 0,
+      borderLeftWidth: 0,
+      borderBottomWidth: 0,
+      borderTopRightRadius: 8,
+    },
+
+    cornerBottomLeft: {
+      bottom: 0,
+      left: 0,
+      borderRightWidth: 0,
+      borderTopWidth: 0,
+      borderBottomLeftRadius: 8,
+    },
+
+    cornerBottomRight: {
+      bottom: 0,
+      right: 0,
+      borderLeftWidth: 0,
+      borderTopWidth: 0,
+      borderBottomRightRadius: 8,
+    },
+
+    /* Animated Scan Line */
+    scanLine: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      height: 3,
+      backgroundColor: COLORS.primary,
+      ...createShadow(8),
+      ...(Platform.OS === 'web' && {
+        boxShadow: `0 0 20px ${COLORS.primary}`,
+      }),
+    },
+
+    /* Grid Lines */
+    gridContainer: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+    },
+
+    gridLineHorizontal: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      height: 1,
+      backgroundColor: 'rgba(39, 174, 96, 0.2)',
+      top: 0,
+    },
+
+    gridLineVertical: {
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      width: 1,
+      backgroundColor: 'rgba(39, 174, 96, 0.2)',
+      left: 0,
+    },
+
+    /* Instructions */
+    instructionsContainer: {
+      marginTop: SPACING.xxl,
+      alignItems: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      paddingVertical: SPACING.md,
+      paddingHorizontal: SPACING.xl,
+      borderRadius: 12,
+      maxWidth: isSmallScreen ? 280 : 320,
+    },
+
+    instructionsText: {
+      color: COLORS.white,
+      fontSize: isSmallScreen ? 15 : 16,
+      fontWeight: '700',
+      textAlign: 'center',
+      marginBottom: 4,
+      letterSpacing: 0.3,
+    },
+
+    instructionsSubtext: {
+      color: COLORS.white,
+      fontSize: isSmallScreen ? 12 : 13,
+      fontWeight: '400',
+      textAlign: 'center',
+      opacity: 0.8,
+    },
+  });
+};

@@ -1,530 +1,535 @@
+import { StyleSheet, Platform, Dimensions } from 'react-native';
 
-import { StyleSheet, Platform, useWindowDimensions } from "react-native";
+const { width, height } = Dimensions.get('window');
+const isSmallScreen = width < 375;
+const isMediumScreen = width >= 375 && width < 768;
+const isLargeScreen = width >= 768;
 
 export const useLandingStyles = () => {
-  const { width, height } = useWindowDimensions();
-  const isWeb = Platform.OS === "web";
-  const isSmallScreen = width < 375;
-  const isMediumScreen = width >= 375 && width < 768;
-  const isLargeScreen = width >= 768;
-
   return StyleSheet.create({
-    // Main Container
+    // Container Styles
     safeArea: {
       flex: 1,
-      backgroundColor: "#fff",
+      backgroundColor: '#ffffff',
     },
     container: {
       flex: 1,
-      backgroundColor: "#fff",
+      backgroundColor: '#ffffff',
     },
     scrollContainer: {
       flexGrow: 1,
+      paddingBottom: 40,
     },
 
-    //pfp section
-     profilePictureSection: {
-      marginBottom: isSmallScreen ? 16 : 20,
-      alignItems: 'center',
-      width: '100%',
-    },
-    sectionLabel: {
-      fontSize: isSmallScreen ? 14 : 16,
-      fontWeight: '600',
-      color: '#374151',
-      marginBottom: isSmallScreen ? 10 : 12,
-      textAlign: 'center',
-      width: '100%',
-    },
-    profileImageContainer: {
-      position: 'relative',
-      width: isSmallScreen ? 100 : 120,
-      height: isSmallScreen ? 100 : 120,
-      borderRadius: 60,
-      backgroundColor: '#f3f4f6',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: isSmallScreen ? 12 : 16,
-      borderWidth: 2,
-      borderColor: '#d1d5db',
-      overflow: 'hidden',
-      alignSelf: 'center',
-    },
-    profileImage: {
-      width: '100%',
-      height: '100%',
-      borderRadius: 60,
-      resizeMode: 'cover',
-    },
-    placeholderImage: {
-      width: '100%',
-      height: '100%',
-      borderRadius: 60,
-      backgroundColor: '#e5e7eb',
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: 2,
-      borderColor: '#9ca3af',
-      borderStyle: 'dashed',
-    },
-    placeholderText: {
-      color: '#6b7280',
-      fontSize: isSmallScreen ? 12 : 14,
-      fontWeight: '500',
-    },
-    removeImageButton: {
-      position: 'absolute',
-      top: -5,
-      right: -5,
-      width: isSmallScreen ? 24 : 30,
-      height: isSmallScreen ? 24 : 30,
-      borderRadius: 15,
-      backgroundColor: '#ef4444',
-      justifyContent: 'center',
-      alignItems: 'center',
-      zIndex: 10,
-      elevation: 3,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.3,
-      shadowRadius: 3,
-    },
-    removeImageText: {
-      color: '#fff',
-      fontSize: isSmallScreen ? 16 : 18,
-      fontWeight: 'bold',
-      lineHeight: isSmallScreen ? 20 : 22,
-    },
-    imageButtonsContainer: {
-      flexDirection: isSmallScreen ? 'column' : 'row',
-      justifyContent: 'center',
-      gap: isSmallScreen ? 8 : 12,
-      width: '100%',
-    },
-    imageButton: {
-      paddingVertical: isSmallScreen ? 10 : 12,
-      paddingHorizontal: isSmallScreen ? 14 : 16,
-      borderRadius: 8,
-      alignItems: 'center',
-      minWidth: isSmallScreen ? 120 : 140,
-      flex: isSmallScreen ? 1 : undefined,
-    },
-    galleryButton: {
-      backgroundColor: '#3b82f6',
-    },
-    cameraButton: {
-      backgroundColor: '#10b981',
-    },
-    imageButtonText: {
-      color: '#fff',
-      fontWeight: '600',
-      fontSize: isSmallScreen ? 13 : 14,
-    },
-
-    // Add image upload toggle button
-    addPhotoButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 8,
-      paddingVertical: isSmallScreen ? 8 : 10,
-      paddingHorizontal: isSmallScreen ? 12 : 16,
-      backgroundColor: '#f3f4f6',
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: '#d1d5db',
-      marginBottom: isSmallScreen ? 12 : 16,
-      width: '100%',
-    },
-    addPhotoButtonText: {
-      color: '#374151',
-      fontSize: isSmallScreen ? 14 : 15,
-      fontWeight: '500',
-    },
-    addPhotoIcon: {
-      fontSize: isSmallScreen ? 16 : 18,
-    },
-
-    // Optional: Add image preview modal
-    imagePreviewModal: {
-      flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.9)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 20,
-    },
-    imagePreview: {
-      width: width * 0.8,
-      height: width * 0.8,
-      borderRadius: 8,
-      resizeMode: 'contain',
-    },
-    closePreviewButton: {
-      position: 'absolute',
-      top: 40,
-      right: 20,
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: 'rgba(255,255,255,0.2)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    closePreviewText: {
-      color: '#fff',
-      fontSize: 24,
-      fontWeight: 'bold',
-    },
-
-    // Optional: Add image upload progress
-    uploadProgressContainer: {
-      width: '100%',
-      backgroundColor: '#f3f4f6',
-      borderRadius: 8,
-      height: 8,
-      marginTop: 8,
-      overflow: 'hidden',
-    },
-    uploadProgressBar: {
-      height: '100%',
-      backgroundColor: '#1b5e20',
-      borderRadius: 8,
-    },
-    uploadProgressText: {
-      fontSize: 12,
-      color: '#6b7280',
-      textAlign: 'center',
-      marginTop: 4,
-    },
-
-    // Header Section
+    // Header Styles
     header: {
-      backgroundColor: "#0d5233",
-      paddingHorizontal: isSmallScreen ? 16 : isWeb ? 40 : 20,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: isSmallScreen ? 12 : isMediumScreen ? 16 : 24,
       paddingVertical: isSmallScreen ? 12 : 16,
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      borderBottomWidth: 3,
-      borderBottomColor: "#1b7a4d",
+      backgroundColor: '#ffffff',
+      borderBottomWidth: 1,
+      borderBottomColor: '#e5e7eb',
+      ...Platform.select({
+        ios: {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.05,
+          shadowRadius: 3,
+        },
+        android: {
+          elevation: 2,
+        },
+      }),
     },
     headerLeft: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 16,
-    },
-    logo: {
-      width: isSmallScreen ? 40 : 50,
-      height: isSmallScreen ? 40 : 50,
-      backgroundColor: "#fff",
-      borderRadius: 8,
-    },
-    headerTitle: {
-      fontSize: isSmallScreen ? 14 : isMediumScreen ? 16 : 20,
-      fontWeight: "bold",
-      color: "#fff",
-      maxWidth: isSmallScreen ? 180 : isMediumScreen ? 250 : 400,
-    },
-    headerRight: {
-      flexDirection: "row",
+      flexDirection: 'row',
+      alignItems: 'center',
       gap: isSmallScreen ? 8 : 12,
     },
+    logo: {
+      width: isSmallScreen ? 32 : 40,
+      height: isSmallScreen ? 32 : 40,
+      borderRadius: isSmallScreen ? 16 : 20,
+    },
+    headerTitle: {
+      fontSize: isSmallScreen ? 18 : isMediumScreen ? 20 : 24,
+      fontWeight: '700',
+      color: '#1b5e20',
+      letterSpacing: 0.3,
+    },
+    headerRight: {
+      flexDirection: 'row',
+      gap: isSmallScreen ? 8 : 12,
+      alignItems: 'center',
+    },
 
-    // Navigation
+    // Navigation Styles
     nav: {
-      backgroundColor: "#333",
-      paddingHorizontal: isSmallScreen ? 12 : isWeb ? 40 : 20,
-      paddingVertical: isSmallScreen ? 10 : 12,
-      alignItems: "center",
+      backgroundColor: '#f8faf9',
+      borderBottomWidth: 1,
+      borderBottomColor: '#e5e7eb',
+      paddingVertical: 12,
     },
     navScroll: {
-      flexDirection: "row",
-      gap: isSmallScreen ? 12 : 20,
+      flexDirection: 'row',
+      paddingHorizontal: isSmallScreen ? 12 : isMediumScreen ? 16 : 24,
+      gap: isSmallScreen ? 16 : isMediumScreen ? 24 : 32,
     },
     navItem: {
       paddingVertical: 8,
-      paddingHorizontal: isSmallScreen ? 8 : 12,
+      paddingHorizontal: 4,
+      borderBottomWidth: 2,
+      borderBottomColor: 'transparent',
     },
     navText: {
-      color: "#fff",
-      fontSize: isSmallScreen ? 13 : 15,
-      fontWeight: "500",
+      fontSize: isSmallScreen ? 14 : 16,
+      fontWeight: '500',
+      color: '#374151',
+      letterSpacing: 0.2,
     },
 
-    // Hero Section (Banner)
+    // Hero Section Styles
     heroSection: {
-      backgroundColor: "#f5f5f5",
-      width: width,
+      backgroundColor: '#ffffff',
+      overflow: 'hidden',
     },
     heroContent: {
-      width: "100%",
-      alignSelf: "center",
+      position: 'relative',
     },
     heroBanner: {
-      width: width,
-      height: isWeb ? height * 0.8 : 400,
-      resizeMode: "cover",
-      marginBottom: 0,
+      width: '100%',
+      height: isSmallScreen ? 320 : isMediumScreen ? 420 : 520,
+      resizeMode: 'cover',
     },
     heroTextOverlay: {
-      position: "absolute",
-      top: 0,
+      position: 'absolute',
+      bottom: 0,
       left: 0,
       right: 0,
-      bottom: 0,
-      justifyContent: "center",
-      alignItems: "center",
-      backgroundColor: "rgba(0,0,0,0.3)",
-      padding: 20,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      backdropFilter: 'blur(8px)',
+      paddingHorizontal: isSmallScreen ? 20 : isMediumScreen ? 28 : 40,
+      paddingVertical: isSmallScreen ? 24 : isMediumScreen ? 32 : 40,
     },
     heroTitle: {
-      fontSize: isSmallScreen ? 28 : 48,
-      fontWeight: "bold",
-      color: "#fff",
-      textAlign: "center",
-      textShadowColor: "rgba(0, 0, 0, 0.75)",
-      textShadowOffset: { width: -1, height: 1 },
-      textShadowRadius: 10,
+      fontSize: isSmallScreen ? 24 : isMediumScreen ? 32 : 40,
+      fontWeight: '800',
+      color: '#ffffff',
+      marginBottom: 8,
+      lineHeight: isSmallScreen ? 30 : isMediumScreen ? 40 : 48,
+      textShadowColor: 'rgba(0, 0, 0, 0.3)',
+      textShadowOffset: { width: 0, height: 2 },
+      textShadowRadius: 4,
     },
     heroSubtitle: {
-      fontSize: isSmallScreen ? 16 : 20,
-      color: "#fff",
-      textAlign: "center",
-      maxWidth: 600,
-      marginTop: 10,
+      fontSize: isSmallScreen ? 14 : isMediumScreen ? 16 : 18,
+      fontWeight: '400',
+      color: '#f3f4f6',
+      lineHeight: isSmallScreen ? 20 : isMediumScreen ? 24 : 28,
+      opacity: 0.95,
     },
 
     // Carousel Indicators
     indicatorsContainer: {
-      flexDirection: "row",
-      justifyContent: "center",
-      alignItems: "center",
-      paddingVertical: 16,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
       gap: 8,
-      backgroundColor: "rgba(0,0,0,0.3)",
+      paddingVertical: 20,
+      backgroundColor: '#ffffff',
     },
     indicator: {
       height: 8,
       borderRadius: 4,
+      ...(Platform.OS === 'web' ? ({ transition: 'all 0.3s ease' } as any) : {}),
+    },
+
+    // Hero Buttons
+    heroButtons: {
+      flexDirection: isSmallScreen ? 'column' : 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: isSmallScreen ? 12 : 16,
+      paddingHorizontal: isSmallScreen ? 20 : isMediumScreen ? 28 : 40,
+      paddingVertical: isSmallScreen ? 20 : 28,
+      backgroundColor: '#ffffff',
+    },
+
+    // Button Styles
+    button: {
+      paddingVertical: isSmallScreen ? 12 : 14,
+      paddingHorizontal: isSmallScreen ? 24 : isMediumScreen ? 32 : 40,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+      minWidth: isSmallScreen ? '100%' : 140,
+      ...Platform.select({
+        ios: {
+          shadowColor: '#1b5e20',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.15,
+          shadowRadius: 8,
+        },
+        android: {
+          elevation: 4,
+        },
+      }),
+    },
+    primaryButton: {
+      backgroundColor: '#1b5e20',
+      borderWidth: 2,
+      borderColor: '#1b5e20',
+    },
+    secondaryButton: {
+      backgroundColor: '#ffffff',
+      borderWidth: 2,
+      borderColor: '#1b5e20',
+    },
+    disabledButton: {
+      opacity: 0.6,
+    },
+    buttonText: {
+      fontSize: isSmallScreen ? 15 : 16,
+      fontWeight: '600',
+      letterSpacing: 0.5,
+    },
+    primaryButtonText: {
+      color: '#ffffff',
+    },
+    secondaryButtonText: {
+      color: '#1b5e20',
     },
 
     // Info Cards Section
     infoCardsSection: {
-      backgroundColor: "#fff",
-      paddingHorizontal: isSmallScreen ? 16 : isWeb ? 40 : 20,
-      paddingVertical: isSmallScreen ? 24 : 32,
+      backgroundColor: '#f8faf9',
+      paddingVertical: isSmallScreen ? 32 : isMediumScreen ? 40 : 56,
+      paddingHorizontal: isSmallScreen ? 16 : isMediumScreen ? 24 : 32,
     },
     infoCardsGrid: {
-      flexDirection: isWeb && isLargeScreen ? "row" : "column",
+      flexDirection: isSmallScreen ? 'column' : 'row',
+      flexWrap: 'wrap',
       gap: isSmallScreen ? 16 : 20,
-      flexWrap: "wrap",
-      justifyContent: "center",
+      justifyContent: 'center',
     },
     infoCard: {
-      backgroundColor: "#0d5233",
-      borderRadius: 12,
-      padding: isSmallScreen ? 20 : 24,
-      flex: isWeb && isLargeScreen ? 1 : undefined,
-      minWidth: isWeb && isLargeScreen ? 250 : undefined,
-      maxWidth: isWeb && isLargeScreen ? 350 : undefined,
-      alignItems: "center",
+      backgroundColor: '#ffffff',
+      borderRadius: 16,
+      padding: isSmallScreen ? 20 : isMediumScreen ? 24 : 28,
+      flex: isSmallScreen ? 1 : 0,
+      minWidth: isSmallScreen ? '100%' : isMediumScreen ? 280 : 320,
+      maxWidth: isSmallScreen ? '100%' : 380,
+      borderWidth: 1,
+      borderColor: '#e5e7eb',
+      ...Platform.select({
+        ios: {
+          shadowColor: '#1b5e20',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.08,
+          shadowRadius: 12,
+        },
+        android: {
+          elevation: 3,
+        },
+      }),
     },
     infoCardTitle: {
-      fontSize: isSmallScreen ? 18 : 20,
-      fontWeight: "bold",
-      color: "#fff",
-      marginBottom: 12,
-      textAlign: "center",
+      fontSize: isSmallScreen ? 18 : isMediumScreen ? 20 : 22,
+      fontWeight: '700',
+      color: '#1b5e20',
+      marginBottom: 8,
+      letterSpacing: 0.3,
     },
     infoCardText: {
       fontSize: isSmallScreen ? 14 : 15,
-      color: "#e0e0e0",
-      textAlign: "center",
-      lineHeight: 20,
+      fontWeight: '400',
+      color: '#4b5563',
+      lineHeight: isSmallScreen ? 20 : 22,
     },
 
-    // Buttons
-    heroButtons: {
-      flexDirection: isWeb ? "row" : "column",
-      gap: isSmallScreen ? 12 : 16,
-      marginTop: isSmallScreen ? 20 : 32,
-      justifyContent: "center",
-    },
-    button: {
-      paddingVertical: isSmallScreen ? 14 : 16,
-      paddingHorizontal: isSmallScreen ? 24 : 32,
-      borderRadius: 10,
-      alignItems: "center",
-      justifyContent: "center",
-      minHeight: isSmallScreen ? 48 : 52,
-      minWidth: isSmallScreen ? 140 : 160,
-      elevation: 3,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.2,
-      shadowRadius: 4,
-    },
-    primaryButton: {
-      backgroundColor: "#1b5e20",
-    },
-    secondaryButton: {
-      backgroundColor: "#fff",
-      borderWidth: 2,
-      borderColor: "#1b5e20",
-    },
-    buttonText: {
-      fontSize: isSmallScreen ? 16 : 17,
-      fontWeight: "700",
-    },
-    primaryButtonText: {
-      color: "#fff",
-    },
-    secondaryButtonText: {
-      color: "#1b5e20",
-    },
-
-    // Features Section
+    // Info/Features Section
     infoSection: {
-      backgroundColor: "#f5f5f5",
-      paddingHorizontal: isSmallScreen ? 16 : isWeb ? 40 : 20,
-      paddingVertical: isSmallScreen ? 32 : isWeb ? 48 : 40,
+      paddingVertical: isSmallScreen ? 40 : isMediumScreen ? 56 : 72,
+      paddingHorizontal: isSmallScreen ? 16 : isMediumScreen ? 24 : 32,
+      backgroundColor: '#ffffff',
     },
     sectionTitle: {
-      fontSize: isSmallScreen ? 24 : isMediumScreen ? 28 : isWeb ? 36 : 30,
-      fontWeight: "bold",
-      color: "#0d5233",
-      textAlign: "center",
-      marginBottom: isSmallScreen ? 24 : 32,
+      fontSize: isSmallScreen ? 26 : isMediumScreen ? 32 : 38,
+      fontWeight: '800',
+      color: '#1f2937',
+      textAlign: 'center',
+      marginBottom: isSmallScreen ? 32 : isMediumScreen ? 40 : 48,
+      letterSpacing: 0.5,
     },
+
+    // Feature Block
     featureBlock: {
-      backgroundColor: "#fff",
-      borderRadius: 12,
-      padding: isSmallScreen ? 16 : 20,
-      marginBottom: isSmallScreen ? 16 : 20,
-      elevation: 2,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
+      marginBottom: isSmallScreen ? 32 : isMediumScreen ? 40 : 48,
+      backgroundColor: '#f8faf9',
+      borderRadius: 20,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: '#e5e7eb',
+      ...Platform.select({
+        ios: {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.06,
+          shadowRadius: 12,
+        },
+        android: {
+          elevation: 2,
+        },
+      }),
     },
     featureImage: {
-      width: "100%",
-      height: isSmallScreen ? 140 : isMediumScreen ? 160 : 180,
-      borderRadius: 8,
-      marginBottom: isSmallScreen ? 12 : 16,
-      resizeMode: "cover",
+      width: '100%',
+      height: isSmallScreen ? 200 : isMediumScreen ? 260 : 320,
+      resizeMode: 'cover',
     },
     featureText: {
-      fontSize: isSmallScreen ? 15 : 16,
-      color: "#333",
-      textAlign: "center",
-      lineHeight: isSmallScreen ? 22 : 24,
-      fontWeight: "500",
+      fontSize: isSmallScreen ? 15 : isMediumScreen ? 16 : 18,
+      fontWeight: '500',
+      color: '#374151',
+      padding: isSmallScreen ? 20 : isMediumScreen ? 24 : 28,
+      lineHeight: isSmallScreen ? 22 : isMediumScreen ? 24 : 28,
+      backgroundColor: '#ffffff',
     },
 
     // Facts Section
     factsSection: {
-      backgroundColor: "#0d5233",
-      paddingHorizontal: isSmallScreen ? 16 : isWeb ? 40 : 20,
-      paddingVertical: isSmallScreen ? 32 : 40,
+      backgroundColor: '#f0f9f4',
+      paddingVertical: isSmallScreen ? 40 : isMediumScreen ? 56 : 72,
+      paddingHorizontal: isSmallScreen ? 16 : isMediumScreen ? 24 : 32,
     },
     factsTitle: {
-      fontSize: isSmallScreen ? 24 : 30,
-      fontWeight: "bold",
-      color: "#fff",
-      textAlign: "center",
-      marginBottom: 30,
+      fontSize: isSmallScreen ? 26 : isMediumScreen ? 32 : 38,
+      fontWeight: '800',
+      color: '#1b5e20',
+      textAlign: 'center',
+      marginBottom: isSmallScreen ? 24 : isMediumScreen ? 32 : 40,
+      letterSpacing: 0.5,
     },
     factCard: {
-      backgroundColor: "rgba(255,255,255,0.1)",
-      padding: 20,
-      borderRadius: 10,
-      marginBottom: 15,
+      backgroundColor: '#ffffff',
+      borderRadius: 16,
+      padding: isSmallScreen ? 20 : isMediumScreen ? 24 : 28,
+      marginBottom: isSmallScreen ? 16 : 20,
       borderLeftWidth: 4,
-      borderLeftColor: "#e67e22",
+      borderLeftColor: '#1b5e20',
+      ...Platform.select({
+        ios: {
+          shadowColor: '#1b5e20',
+          shadowOffset: { width: 0, height: 3 },
+          shadowOpacity: 0.1,
+          shadowRadius: 8,
+        },
+        android: {
+          elevation: 3,
+        },
+      }),
     },
     factHeader: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: 8,
+      marginBottom: 12,
+      gap: 12,
     },
     factIcon: {
-      fontSize: 24,
-      marginRight: 10,
+      fontSize: isSmallScreen ? 28 : 32,
+      lineHeight: isSmallScreen ? 28 : 32,
     },
     factLabel: {
-      fontSize: 18,
-      fontWeight: "bold",
-      color: "#fff",
+      fontSize: isSmallScreen ? 17 : isMediumScreen ? 18 : 20,
+      fontWeight: '700',
+      color: '#1b5e20',
+      flex: 1,
+      letterSpacing: 0.3,
     },
     factDesc: {
-      fontSize: 14,
-      color: "#e0e0e0",
-      lineHeight: 22,
+      fontSize: isSmallScreen ? 14 : 15,
+      fontWeight: '400',
+      color: '#4b5563',
+      lineHeight: isSmallScreen ? 20 : 22,
+      paddingLeft: isSmallScreen ? 40 : 44,
     },
 
-    // Modal
+    // Contact Section
+    contactSection: {
+      backgroundColor: '#ffffff',
+      paddingVertical: isSmallScreen ? 28 : 36,
+      paddingHorizontal: isSmallScreen ? 16 : 24,
+      alignItems: 'center',
+    },
+    contactTitle: {
+      fontSize: isSmallScreen ? 20 : 22,
+      fontWeight: '700',
+      color: '#1b5e20',
+      marginBottom: 8,
+      textAlign: 'center',
+    },
+    contactText: {
+      fontSize: isSmallScreen ? 14 : 15,
+      color: '#374151',
+      textAlign: 'center',
+    },
+
+    // Modal Styles
     modalOverlay: {
       flex: 1,
-      backgroundColor: "rgba(0,0,0,0.6)",
-      justifyContent: "center",
-      alignItems: "center",
-      paddingHorizontal: isSmallScreen ? 16 : 20,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 16,
     },
-     // Update modalContent to handle scroll
     modalContent: {
-      backgroundColor: "#fff",
-      borderRadius: 16,
-      width: "100%",
-      maxWidth: 400,
-      maxHeight: isSmallScreen ? '85%' : '80%',
-      padding: isSmallScreen ? 20 : 24,
-      elevation: 5,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
+      backgroundColor: '#ffffff',
+      borderRadius: 24,
+      padding: isSmallScreen ? 24 : isMediumScreen ? 28 : 32,
+      width: '100%',
+      maxWidth: 480,
+      maxHeight: '90%',
+      ...Platform.select({
+        ios: {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.2,
+          shadowRadius: 24,
+        },
+        android: {
+          elevation: 8,
+        },
+      }),
     },
-
-    // Make modal scrollable container
-    modalScrollContent: {
-      paddingBottom: 20,
-    },
-    
     modalTitle: {
-      fontSize: isSmallScreen ? 24 : 26,
-      fontWeight: "bold",
-      color: "#0d5233",
-      textAlign: "center",
+      fontSize: isSmallScreen ? 24 : isMediumScreen ? 28 : 32,
+      fontWeight: '800',
+      color: '#1b5e20',
+      textAlign: 'center',
       marginBottom: isSmallScreen ? 20 : 24,
-    },
-    input: {
-      borderWidth: 1.5,
-      borderColor: "#d1d5db",
-      borderRadius: 10,
-      paddingVertical: isSmallScreen ? 12 : 14,
-      paddingHorizontal: isSmallScreen ? 14 : 16,
-      fontSize: isSmallScreen ? 15 : 16,
-      color: "#1f2937",
-      marginBottom: isSmallScreen ? 14 : 16,
-      backgroundColor: "#f9fafb",
+      letterSpacing: 0.5,
     },
 
-    // Loading
-    disabledButton: {
-      opacity: 0.6,
+    // Profile Picture Section (Signup)
+    profilePictureSection: {
+      marginBottom: 24,
+      alignItems: 'center',
     },
-    loadingContainer: {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: "rgba(255, 255, 255, 0.8)",
-      justifyContent: "center",
-      alignItems: "center",
-      zIndex: 1000,
+    sectionLabel: {
+      fontSize: isSmallScreen ? 15 : 16,
+      fontWeight: '600',
+      color: '#374151',
+      marginBottom: 16,
+      alignSelf: 'flex-start',
+      width: '100%',
     },
-    
+    profileImageContainer: {
+      position: 'relative',
+      marginBottom: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    profileImage: {
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+      borderWidth: 3,
+      borderColor: '#1b5e20',
+      backgroundColor: '#f3f4f6',
+    },
+    placeholderImage: {
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+      backgroundColor: '#e5e7eb',
+      borderWidth: 2,
+      borderColor: '#d1d5db',
+      borderStyle: 'dashed',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    placeholderText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: '#9ca3af',
+    },
+    removeImageButton: {
+      position: 'absolute',
+      top: -4,
+      right: -4,
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: '#ef4444',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 2,
+      borderColor: '#ffffff',
+      ...Platform.select({
+        ios: {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.2,
+          shadowRadius: 4,
+        },
+        android: {
+          elevation: 4,
+        },
+      }),
+    },
+    removeImageText: {
+      color: '#ffffff',
+      fontSize: 20,
+      fontWeight: '700',
+      lineHeight: 20,
+    },
+
+    // Image Buttons
+    imageButtonsContainer: {
+      flexDirection: 'row',
+      gap: 12,
+      width: '100%',
+      justifyContent: 'center',
+    },
+    imageButton: {
+      flex: 1,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 2,
+      maxWidth: 150,
+    },
+    galleryButton: {
+      backgroundColor: '#ffffff',
+      borderColor: '#1b5e20',
+    },
+    cameraButton: {
+      backgroundColor: '#1b5e20',
+      borderColor: '#1b5e20',
+    },
+    imageButtonText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: '#1b5e20',
+    },
+
+    // Input Styles
+    input: {
+      backgroundColor: '#f9fafb',
+      borderWidth: 2,
+      borderColor: '#e5e7eb',
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      paddingVertical: isSmallScreen ? 12 : 14,
+      fontSize: isSmallScreen ? 15 : 16,
+      color: '#1f2937',
+      marginBottom: 16,
+      fontWeight: '500',
+      ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : {}),
+    },
   });
 };
