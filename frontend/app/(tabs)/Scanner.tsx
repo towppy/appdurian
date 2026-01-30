@@ -1,37 +1,38 @@
-import React, { useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import React, { useRef, useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, Image, Platform, Animated } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { router } from 'expo-router';
+import { useScannerStyles } from '../styles/Scanner.styles';
 
-/* =====================
-   Design Tokens
-===================== */
-const COLORS = {
-  primary: '#27AE60',
-  primaryDark: '#2e7d32',
-  white: '#FFFFFF',
-  border: '#E0E0E0',
-  black: '#000000',
-  text: '#333333',
-} as const;
-
-const SPACING = {
-  xs: 6,
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  xxl: 24,
-  xxxl: 40,
-} as const;
-
-/* =====================
-   Component
-===================== */
 export default function Scanner() {
   const cameraRef = useRef<CameraView | null>(null);
   const [permission, requestPermission] = useCameraPermissions();
   const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const scanLineAnim = useRef(new Animated.Value(0)).current;
+
+  const styles = useScannerStyles();
+
+  // Animated scanning line effect
+  useEffect(() => {
+    if (!photoUri) {
+      const animation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(scanLineAnim, {
+            toValue: 1,
+            duration: 2000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scanLineAnim, {
+            toValue: 0,
+            duration: 2000,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      animation.start();
+      return () => animation.stop();
+    }
+  }, [photoUri]);
 
   if (!permission) {
     return (
@@ -55,11 +56,13 @@ export default function Scanner() {
   const takePicture = async () => {
     if (!cameraRef.current) return;
     const photo = await cameraRef.current.takePictureAsync();
-    setPhotoUri(photo.uri);
+    if (photo) {
+      setPhotoUri(photo.uri);
+    }
   };
 
   const handleBack = () => {
-    router.replace('/LandingMobile');
+    router.replace('/LandingScreen');
   };
 
   return (
@@ -67,7 +70,7 @@ export default function Scanner() {
       {/* Camera MUST be absolute */}
       <CameraView
         ref={cameraRef}
-        style={StyleSheet.absoluteFill}
+        style={styles.camera}
         facing="back"
       />
 
@@ -76,6 +79,57 @@ export default function Scanner() {
         <TouchableOpacity style={styles.backButton} onPress={handleBack}>
           <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
+
+        {/* AR Scan Overlay - only show when no photo taken */}
+        {!photoUri && (
+          <View style={styles.scanOverlay}>
+            {/* Scan Frame */}
+            <View style={styles.scanFrame}>
+              {/* Corner Markers */}
+              <View style={[styles.corner, styles.cornerTopLeft]} />
+              <View style={[styles.corner, styles.cornerTopRight]} />
+              <View style={[styles.corner, styles.cornerBottomLeft]} />
+              <View style={[styles.corner, styles.cornerBottomRight]} />
+              
+              {/* Animated Scan Line */}
+              <Animated.View
+                style={[
+                  styles.scanLine,
+                  {
+                    transform: [
+                      {
+                        translateY: scanLineAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0, 300], // Adjust based on frame height
+                        }),
+                      },
+                    ],
+                  },
+                ]}
+              />
+              
+              {/* Grid Lines */}
+              <View style={styles.gridContainer}>
+                <View style={styles.gridLineHorizontal} />
+                <View style={[styles.gridLineHorizontal, { top: '50%' }]} />
+                <View style={[styles.gridLineHorizontal, { bottom: 0 }]} />
+                <View style={styles.gridLineVertical} />
+                <View style={[styles.gridLineVertical, { left: '50%' }]} />
+                <View style={[styles.gridLineVertical, { right: 0 }]} />
+              </View>
+            </View>
+            
+            {/* Instructions */}
+            <View style={styles.instructionsContainer}>
+              <Text style={styles.instructionsText}>
+                🎯 Position durian in frame
+              </Text>
+              <Text style={styles.instructionsSubtext}>
+                Ensure good lighting for best results
+              </Text>
+            </View>
+          </View>
+        )}
 
         <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
           <Text style={styles.captureText}>📸 Take Picture</Text>
@@ -90,99 +144,3 @@ export default function Scanner() {
     </View>
   );
 }
-
-/* =====================
-   Styles
-===================== */
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.black,
-  },
-
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 10,
-  },
-
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: COLORS.black,
-  },
-
-  permissionText: {
-    color: COLORS.white,
-    fontSize: 18,
-    marginBottom: SPACING.lg,
-    textAlign: 'center',
-  },
-
-  button: {
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.lg,
-    backgroundColor: COLORS.primaryDark,
-    borderRadius: 8,
-  },
-
-  buttonText: {
-    color: COLORS.white,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-
-  backButton: {
-    position: 'absolute',
-    top: SPACING.xxxl,
-    left: SPACING.xl,
-    backgroundColor: COLORS.white,
-    paddingVertical: SPACING.xs,
-    paddingHorizontal: SPACING.md,
-    borderRadius: 8,
-    elevation: 4,
-  },
-
-  backText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.text,
-  },
-
-  captureButton: {
-    position: 'absolute',
-    bottom: SPACING.xxxl,
-    alignSelf: 'center',
-    backgroundColor: COLORS.primary,
-    paddingVertical: 16,
-    paddingHorizontal: SPACING.xxl,
-    borderRadius: 30,
-    elevation: 6,
-    minWidth: 160,
-  },
-
-  captureText: {
-    color: COLORS.white,
-    fontSize: 16,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-
-  previewContainer: {
-    position: 'absolute',
-    bottom: 110,
-    left: SPACING.xl,
-    width: 120,
-    height: 160,
-    borderRadius: 12,
-    overflow: 'hidden',
-    borderWidth: 2,
-    borderColor: COLORS.border,
-    backgroundColor: COLORS.white,
-  },
-
-  previewImage: {
-    width: '100%',
-    height: '100%',
-  },
-});
