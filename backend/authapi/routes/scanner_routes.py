@@ -3,19 +3,22 @@ from flask import Blueprint, request, jsonify
 import tempfile
 import os
 from datetime import datetime
-from roboflow_detector import create_detector
+
+# Use local YOLO model (your trained model)
+from yolo_detector import get_yolo_detector
 
 scanner_bp = Blueprint('scanner', __name__)
 
 @scanner_bp.route("/health", methods=["GET"])
 def health_check():
     """Check detector health"""
-    detector = create_detector("scanner")
+    detector = get_yolo_detector()
     test_result = detector.test_connection()
     
     return jsonify({
         "service": "Durian Scanner API",
-        "model": detector.model_id,
+        "model": str(detector.model_path.name) if detector.model_path else "Not loaded",
+        "model_type": "Local YOLO (custom trained)",
         "available": detector.available,
         "connection_test": test_result,
         "timestamp": datetime.utcnow().isoformat()
@@ -83,8 +86,8 @@ def detect_durians():
         
         print(f"🔍 Processing image: {image_file.filename} ({file_size/1024:.1f} KB)")
         
-        # Create detector and predict
-        detector = create_detector("scanner")
+        # Use local YOLO model for detection
+        detector = get_yolo_detector()
         result = detector.predict(temp_path)
         
         # Clean up temp file
@@ -112,45 +115,16 @@ def detect_durians():
 
 @scanner_bp.route("/classify/disease", methods=["POST", "OPTIONS"])
 def classify_disease():
-    """Classify durian disease"""
+    """Classify durian disease - TODO: Add disease model"""
     if request.method == "OPTIONS":
         return '', 200
     
-    try:
-        if 'image' not in request.files:
-            return jsonify({
-                "success": False,
-                "error": "No image provided"
-            }), 400
-        
-        image_file = request.files['image']
-        
-        # Save temporarily
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp:
-            image_file.save(tmp.name)
-            temp_path = tmp.name
-        
-        print(f"🦠 Classifying disease in: {image_file.filename}")
-        
-        # Create classifier and predict
-        classifier = create_detector("disease")
-        result = classifier.predict(temp_path)
-        
-        # Clean up
-        os.unlink(temp_path)
-        
-        # Add treatment advice based on disease
-        if result.get("success") and result.get("type") == "classification":
-            disease = result["prediction"]["class"]
-            result["treatment"] = _get_disease_treatment(disease)
-        
-        return jsonify(result), 200 if result.get("success") else 500
-        
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
+    # Disease classification not yet implemented with local model
+    return jsonify({
+        "success": False,
+        "error": "Not implemented",
+        "message": "Disease classification coming soon. Train a disease model and add it here."
+    }), 501
 
 def _get_disease_treatment(disease: str) -> dict:
     """Get treatment advice for disease"""
@@ -187,13 +161,15 @@ def _get_disease_treatment(disease: str) -> dict:
 def test_endpoint():
     """Test endpoint with sample prediction"""
     try:
-        # Create a simple test response
-        detector = create_detector("scanner")
+        # Test local YOLO model
+        detector = get_yolo_detector()
         test_result = detector.test_connection()
         
         return jsonify({
             "success": True,
             "message": "Scanner API is working",
+            "model_type": "Local YOLO (custom trained)",
+            "model_file": str(detector.model_path.name) if detector.model_path else "Not loaded",
             "connection": test_result,
             "endpoints": {
                 "detect": "POST /scanner/detect",

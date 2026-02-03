@@ -89,16 +89,39 @@ def deactivate_user(user_id):
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
-@admin_bp.route("/users/<user_id>", methods=["DELETE", "OPTIONS"])
-def delete_user(user_id):
-    """Delete user (admin)"""
+@admin_bp.route("/users/<user_id>/activate", methods=["PUT", "OPTIONS"])
+def activate_user(user_id):
+    """Reactivate user (admin)"""
     if request.method == "OPTIONS":
         return '', 200
     
     try:
-        result = users_collection.delete_one({"_id": ObjectId(user_id)})
+        result = users_collection.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": {"isActive": True, "updatedAt": datetime.datetime.utcnow().isoformat()}}
+        )
         
-        if result.deleted_count > 0:
+        if result.modified_count > 0:
+            return jsonify({"success": True, "message": "User reactivated"}), 200
+        else:
+            return jsonify({"success": False, "error": "User not found"}), 404
+            
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@admin_bp.route("/users/<user_id>", methods=["DELETE", "OPTIONS"])
+def delete_user(user_id):
+    """Soft delete user (admin) - marks user as inactive"""
+    if request.method == "OPTIONS":
+        return '', 200
+    
+    try:
+        result = users_collection.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": {"isActive": False, "updatedAt": datetime.datetime.utcnow().isoformat()}}
+        )
+        
+        if result.modified_count > 0:
             return jsonify({"success": True, "message": "User deleted"}), 200
         else:
             return jsonify({"success": False, "error": "User not found"}), 404
