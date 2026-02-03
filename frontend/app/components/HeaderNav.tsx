@@ -79,10 +79,7 @@ export default function HeaderNav({ currentScreen, onNavigate }: HeaderNavProps)
         ))}
       </ScrollView>
 
-      {/* Notifications */}
-      <TouchableOpacity style={styles.notificationButton}>
-        <Ionicons name="notifications-outline" size={24} color="#333" />
-      </TouchableOpacity>
+
     </View>
   );
 }
@@ -137,10 +134,5 @@ const styles = StyleSheet.create({
     color: '#27AE60',
     fontWeight: '600',
   },
-  notificationButton: {
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: '#f8f9fa',
-    marginLeft: 8,
-  },
+  
 });

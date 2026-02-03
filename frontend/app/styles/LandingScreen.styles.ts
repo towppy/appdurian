@@ -1,538 +1,721 @@
 import { StyleSheet, Platform, Dimensions } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
+
+// Responsive helper functions
+const isWeb = Platform.OS === 'web';
 const isSmallScreen = width < 375;
 const isMediumScreen = width >= 375 && width < 768;
 const isLargeScreen = width >= 768;
 
+// Vibrant Color Palette
+const colors = {
+  // Primary Green Shades
+  primary: '#2d7a3e',
+  primaryDark: '#1b5e20',
+  primaryLight: '#4caf50',
+  primaryGlow: '#66bb6a',
+  
+  // Accent Colors
+  accent: '#ff9800',
+  accentLight: '#ffb74d',
+  accentDark: '#f57c00',
+  
+  // Secondary Colors
+  secondary: '#00bcd4',
+  secondaryLight: '#4dd0e1',
+  secondaryDark: '#0097a7',
+  
+  // Purple Shades
+  purple: '#9c27b0',
+  purpleLight: '#ba68c8',
+  purpleDark: '#7b1fa2',
+  
+  // Pink Shades
+  pink: '#e91e63',
+  pinkLight: '#f06292',
+  
+  // Background Colors
+  bgLight: '#f0f9f4',
+  bgWhite: '#ffffff',
+  bgGray: '#f5f7fa',
+  
+  // Gradient Colors
+  gradientStart: '#1b5e20',
+  gradientMid: '#2d7a3e',
+  gradientEnd: '#4caf50',
+  
+  // Text Colors
+  textDark: '#1a1a1a',
+  textMedium: '#374151',
+  textLight: '#6b7280',
+  textWhite: '#ffffff',
+  
+  // Border Colors
+  borderLight: '#e0f2f1',
+  borderMedium: '#b2dfdb',
+  borderDark: '#4db6ac',
+};
+
+// Responsive sizing
+const scale = (size: number) => {
+  if (isWeb && isLargeScreen) return size;
+  if (isSmallScreen) return size * 0.9;
+  return size;
+};
+
+const verticalScale = (size: number) => {
+  if (isWeb && isLargeScreen) return size;
+  if (isSmallScreen) return size * 0.85;
+  return size;
+};
+
+const moderateScale = (size: number, factor = 0.5) => {
+  return size + (scale(size) - size) * factor;
+};
+
 export const useLandingStyles = () => {
+  const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+  const isWebPlatform = Platform.OS === 'web';
+  const isSmall = screenWidth < 375;
+  const isMedium = screenWidth >= 375 && screenWidth < 768;
+  const isLarge = screenWidth >= 768;
+
   return StyleSheet.create({
-    // Container Styles
     safeArea: {
       flex: 1,
-      backgroundColor: '#ffffff',
+      backgroundColor: '#fff',
     },
+    
     container: {
       flex: 1,
-      backgroundColor: '#ffffff',
+      backgroundColor: '#fff',
     },
+    
     scrollContainer: {
       flexGrow: 1,
-      paddingBottom: 40,
+      paddingBottom: verticalScale(20),
     },
 
-    // Header Styles
+    // ========== HEADER ==========
     header: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      paddingHorizontal: isSmallScreen ? 12 : isMediumScreen ? 16 : 24,
-      paddingVertical: isSmallScreen ? 12 : 16,
-      backgroundColor: '#ffffff',
-      borderBottomWidth: 1,
-      borderBottomColor: '#e5e7eb',
-      ...Platform.select({
-        ios: {
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.05,
-          shadowRadius: 3,
-        },
-        android: {
-          elevation: 2,
-        },
-      }),
+      paddingHorizontal: isSmall ? 12 : isWebPlatform && isLarge ? 40 : 20,
+      paddingVertical: isSmall ? 14 : 18,
+      backgroundColor: colors.bgWhite,
+      borderBottomWidth: 3,
+      borderBottomColor: colors.primaryLight,
+      elevation: 8,
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 6,
+      zIndex: 10,
     },
+    
     headerLeft: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: isSmallScreen ? 8 : 12,
+      gap: isSmall ? 8 : 12,
+      flex: isWebPlatform && isLarge ? 0 : 1,
     },
+    
     logo: {
-      width: isSmallScreen ? 32 : 40,
-      height: isSmallScreen ? 32 : 40,
-      borderRadius: isSmallScreen ? 16 : 20,
+      width: isSmall ? 36 : 44,
+      height: isSmall ? 36 : 44,
+      borderRadius: isSmall ? 18 : 22,
+      borderWidth: 2,
+      borderColor: colors.primaryLight,
     },
+    
     headerTitle: {
-      fontSize: isSmallScreen ? 18 : isMediumScreen ? 20 : 24,
-      fontWeight: '700',
-      color: '#1b5e20',
-      letterSpacing: 0.3,
+      fontSize: isSmall ? 17 : isWebPlatform && isLarge ? 24 : 20,
+      fontWeight: '800',
+      color: colors.primary,
+      textShadowColor: 'rgba(45, 122, 62, 0.2)',
+      textShadowOffset: { width: 1, height: 1 },
+      textShadowRadius: 3,
     },
+    
     headerRight: {
       flexDirection: 'row',
-      gap: isSmallScreen ? 8 : 12,
+      gap: isSmall ? 8 : 12,
       alignItems: 'center',
     },
 
-    // Navigation Styles
+    // ========== NAVIGATION ==========
     nav: {
-      backgroundColor: '#f8faf9',
-      borderBottomWidth: 1,
-      borderBottomColor: '#e5e7eb',
-      paddingVertical: 12,
+      backgroundColor: colors.bgLight,
+      borderBottomWidth: 2,
+      borderBottomColor: colors.borderMedium,
+      paddingVertical: isSmall ? 10 : 14,
+      elevation: 4,
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.15,
+      shadowRadius: 4,
     },
+    
     navScroll: {
       flexDirection: 'row',
-      paddingHorizontal: isSmallScreen ? 12 : isMediumScreen ? 16 : 24,
-      gap: isSmallScreen ? 16 : isMediumScreen ? 24 : 32,
+      paddingHorizontal: isSmall ? 12 : isWebPlatform && isLarge ? 40 : 20,
+      gap: isSmall ? 16 : isWebPlatform && isLarge ? 32 : 24,
     },
+    
     navItem: {
-      paddingVertical: 8,
-      paddingHorizontal: 4,
-      borderBottomWidth: 2,
-      borderBottomColor: 'transparent',
+      paddingVertical: 10,
+      paddingHorizontal: isSmall ? 8 : 12,
+      borderRadius: 20,
+      backgroundColor: colors.bgWhite,
+      elevation: 2,
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
     },
+    
     navText: {
-      fontSize: isSmallScreen ? 14 : 16,
-      fontWeight: '500',
-      color: '#374151',
-      letterSpacing: 0.2,
+      fontSize: isSmall ? 14 : 15,
+      fontWeight: '700',
+      color: colors.primary,
     },
 
-    // Hero Section Styles
+    // ========== HERO SECTION ==========
     heroSection: {
-      backgroundColor: '#ffffff',
-      overflow: 'hidden',
-    },
-    heroContent: {
-      position: 'relative',
-    },
-    heroBanner: {
+      backgroundColor: colors.bgWhite,
       width: '100%',
-      height: isSmallScreen ? 320 : isMediumScreen ? 420 : 520,
+    },
+    
+    heroContent: {
+      width: '100%',
+    },
+    
+    heroBanner: {
+      width: screenWidth,
+      height: isSmall ? screenHeight * 0.38 : isWebPlatform && isLarge ? 520 : screenHeight * 0.42,
       resizeMode: 'cover',
     },
+    
     heroTextOverlay: {
       position: 'absolute',
       bottom: 0,
       left: 0,
       right: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      backdropFilter: 'blur(8px)',
-      paddingHorizontal: isSmallScreen ? 20 : isMediumScreen ? 28 : 40,
-      paddingVertical: isSmallScreen ? 24 : isMediumScreen ? 32 : 40,
+      backgroundColor: 'rgba(27, 94, 32, 0.85)',
+      padding: isSmall ? 18 : isWebPlatform && isLarge ? 44 : 28,
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
     },
+    
     heroTitle: {
-      fontSize: isSmallScreen ? 24 : isMediumScreen ? 32 : 40,
-      fontWeight: '800',
-      color: '#ffffff',
-      marginBottom: 8,
-      lineHeight: isSmallScreen ? 30 : isMediumScreen ? 40 : 48,
+      fontSize: isSmall ? 22 : isWebPlatform && isLarge ? 40 : 30,
+      fontWeight: '900',
+      color: colors.textWhite,
+      marginBottom: 10,
+      textAlign: 'left',
       textShadowColor: 'rgba(0, 0, 0, 0.3)',
-      textShadowOffset: { width: 0, height: 2 },
+      textShadowOffset: { width: 2, height: 2 },
       textShadowRadius: 4,
+      letterSpacing: 0.5,
     },
+    
     heroSubtitle: {
-      fontSize: isSmallScreen ? 14 : isMediumScreen ? 16 : 18,
-      fontWeight: '400',
-      color: '#f3f4f6',
-      lineHeight: isSmallScreen ? 20 : isMediumScreen ? 24 : 28,
-      opacity: 0.95,
+      fontSize: isSmall ? 14 : isWebPlatform && isLarge ? 19 : 16,
+      color: colors.accentLight,
+      lineHeight: isSmall ? 20 : isWebPlatform && isLarge ? 28 : 24,
+      textAlign: 'left',
+      fontWeight: '600',
     },
-
-    // Carousel Indicators
+    
     indicatorsContainer: {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      gap: 8,
-      paddingVertical: 20,
-      backgroundColor: '#ffffff',
+      paddingVertical: isSmall ? 16 : 20,
+      gap: 10,
+      backgroundColor: colors.bgLight,
     },
+    
     indicator: {
-      height: 8,
-      borderRadius: 4,
-      ...(Platform.OS === 'web' ? ({ transition: 'all 0.3s ease' } as any) : {}),
+      height: 10,
+      borderRadius: 5,
+      elevation: 2,
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.3,
+      shadowRadius: 2,
     },
-
-    // Hero Buttons
+    
     heroButtons: {
-      flexDirection: isSmallScreen ? 'column' : 'row',
+      flexDirection: isSmall ? 'column' : 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      gap: isSmallScreen ? 12 : 16,
-      paddingHorizontal: isSmallScreen ? 20 : isMediumScreen ? 28 : 40,
-      paddingVertical: isSmallScreen ? 20 : 28,
-      backgroundColor: '#ffffff',
+      gap: isSmall ? 14 : 18,
+      paddingHorizontal: isSmall ? 16 : isWebPlatform && isLarge ? 40 : 24,
+      paddingBottom: verticalScale(28),
+      paddingTop: verticalScale(12),
+      backgroundColor: colors.bgLight,
     },
 
-    // Button Styles
+    // ========== BUTTONS ==========
     button: {
-      paddingVertical: isSmallScreen ? 12 : 14,
-      paddingHorizontal: isSmallScreen ? 24 : isMediumScreen ? 32 : 40,
-      borderRadius: 12,
+      paddingVertical: isSmall ? 14 : isWebPlatform && isLarge ? 16 : 14,
+      paddingHorizontal: isSmall ? 24 : isWebPlatform && isLarge ? 36 : 28,
+      borderRadius: 30,
+      minWidth: isSmall ? '100%' : isWebPlatform && isLarge ? 160 : 140,
       alignItems: 'center',
       justifyContent: 'center',
-      minWidth: isSmallScreen ? '100%' : 140,
-      ...Platform.select({
-        ios: {
-          shadowColor: '#1b5e20',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.15,
-          shadowRadius: 8,
-        },
-        android: {
-          elevation: 4,
-        },
-      }),
-    },
-    primaryButton: {
-      backgroundColor: '#1b5e20',
-      borderWidth: 2,
-      borderColor: '#1b5e20',
-    },
-    secondaryButton: {
-      backgroundColor: '#ffffff',
-      borderWidth: 2,
-      borderColor: '#1b5e20',
-    },
-    disabledButton: {
-      opacity: 0.6,
-    },
-    buttonText: {
-      fontSize: isSmallScreen ? 15 : 16,
-      fontWeight: '600',
-      letterSpacing: 0.5,
-    },
-    primaryButtonText: {
-      color: '#ffffff',
-    },
-    secondaryButtonText: {
-      color: '#1b5e20',
-    },
-
-    // Info Cards Section
-    infoCardsSection: {
-      backgroundColor: '#f8faf9',
-      paddingVertical: isSmallScreen ? 32 : isMediumScreen ? 40 : 56,
-      paddingHorizontal: isSmallScreen ? 16 : isMediumScreen ? 24 : 32,
-    },
-    infoCardsGrid: {
-      flexDirection: isSmallScreen ? 'column' : 'row',
-      flexWrap: 'wrap',
-      gap: isSmallScreen ? 16 : 20,
-      justifyContent: 'center',
-    },
-    infoCard: {
-      backgroundColor: '#ffffff',
-      borderRadius: 16,
-      padding: isSmallScreen ? 20 : isMediumScreen ? 24 : 28,
-      flex: isSmallScreen ? 1 : 0,
-      minWidth: isSmallScreen ? '100%' : isMediumScreen ? 280 : 320,
-      maxWidth: isSmallScreen ? '100%' : 380,
-      borderWidth: 1,
-      borderColor: '#e5e7eb',
-      ...Platform.select({
-        ios: {
-          shadowColor: '#1b5e20',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.08,
-          shadowRadius: 12,
-        },
-        android: {
-          elevation: 3,
-        },
-      }),
-    },
-    infoCardTitle: {
-      fontSize: isSmallScreen ? 18 : isMediumScreen ? 20 : 22,
-      fontWeight: '700',
-      color: '#1b5e20',
-      marginBottom: 8,
-      letterSpacing: 0.3,
-    },
-    infoCardText: {
-      fontSize: isSmallScreen ? 14 : 15,
-      fontWeight: '400',
-      color: '#4b5563',
-      lineHeight: isSmallScreen ? 20 : 22,
-    },
-
-    // ABOUT US Section
-   infoSection: {
-  paddingVertical: isSmallScreen ? 40 : 56,
-  paddingHorizontal: isSmallScreen ? 20 : 32,
-  backgroundColor: '#ffffff',
-},
-sectionTitle: {
-  fontSize: isSmallScreen ? 28 : 36,
-  fontWeight: '800',
-  color: '#0f172a',
-  textAlign: 'center',
-  marginBottom: isSmallScreen ? 32 : 48,
-  lineHeight: isSmallScreen ? 36 : 44,
-},
-
-// Feature Block
-featureBlock: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  marginBottom: isSmallScreen ? 24 : 32,
-  padding: isSmallScreen ? 20 : 24,
-  backgroundColor: '#ffffff',
-  borderRadius: 16,
-  borderLeftWidth: 4,
-  borderLeftColor: '#10b981', // Emerald green accent
-  ...Platform.select({
-    ios: {
-      shadowColor: '#10b981',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.15,
+      elevation: 6,
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
       shadowRadius: 8,
+      transform: [{ scale: 1 }],
     },
-    android: {
-      elevation: 3,
+    
+    primaryButton: {
+      backgroundColor: colors.primary,
+      borderWidth: 0,
     },
-  }),
-},
-featureImage: {
-  width: isSmallScreen ? 80 : 100,
-  height: isSmallScreen ? 80 : 100,
-  borderRadius: 12,
-  marginRight: isSmallScreen ? 16 : 20,
-  resizeMode: 'cover',
-},
-featureText: {
-  flex: 1,
-  fontSize: isSmallScreen ? 16 : 18,
-  fontWeight: '600',
-  color: '#334155',
-  lineHeight: isSmallScreen ? 24 : 28,
-},
-
-    // Facts Section
-    factsSection: {
-      backgroundColor: '#f0f9f4',
-      paddingVertical: isSmallScreen ? 40 : isMediumScreen ? 56 : 72,
-      paddingHorizontal: isSmallScreen ? 16 : isMediumScreen ? 24 : 32,
+    
+    secondaryButton: {
+      backgroundColor: colors.bgWhite,
+      borderWidth: 3,
+      borderColor: colors.primaryLight,
     },
-    factsTitle: {
-      fontSize: isSmallScreen ? 26 : isMediumScreen ? 32 : 38,
-      fontWeight: '800',
-      color: '#1b5e20',
-      textAlign: 'center',
-      marginBottom: isSmallScreen ? 24 : isMediumScreen ? 32 : 40,
+    
+    disabledButton: {
+      opacity: 0.5,
+    },
+    
+    buttonText: {
+      fontSize: isSmall ? 15 : 16,
+      fontWeight: '700',
       letterSpacing: 0.5,
     },
-    factCard: {
-      backgroundColor: '#ffffff',
-      borderRadius: 16,
-      padding: isSmallScreen ? 20 : isMediumScreen ? 24 : 28,
-      marginBottom: isSmallScreen ? 16 : 20,
-      borderLeftWidth: 4,
-      borderLeftColor: '#1b5e20',
-      ...Platform.select({
-        ios: {
-          shadowColor: '#1b5e20',
-          shadowOffset: { width: 0, height: 3 },
-          shadowOpacity: 0.1,
-          shadowRadius: 8,
-        },
-        android: {
-          elevation: 3,
-        },
-      }),
+    
+    primaryButtonText: {
+      color: colors.textWhite,
+      textShadowColor: 'rgba(0, 0, 0, 0.2)',
+      textShadowOffset: { width: 1, height: 1 },
+      textShadowRadius: 2,
     },
-    factHeader: {
+    
+    secondaryButtonText: {
+      color: colors.primary,
+      fontWeight: '800',
+    },
+
+    // ========== INFO SECTION (About Us) ==========
+    infoSection: {
+      paddingHorizontal: isSmall ? 16 : isWebPlatform && isLarge ? 80 : 24,
+      paddingVertical: verticalScale(40),
+      backgroundColor: colors.bgWhite,
+    },
+    
+    sectionTitle: {
+      fontSize: isSmall ? 24 : isWebPlatform && isLarge ? 36 : 28,
+      fontWeight: '900',
+      color: colors.primary,
+      marginBottom: verticalScale(12),
+      textAlign: 'center',
+      textShadowColor: 'rgba(45, 122, 62, 0.2)',
+      textShadowOffset: { width: 2, height: 2 },
+      textShadowRadius: 4,
+      letterSpacing: 0.5,
+    },
+
+    aboutSubtitle: {
+      fontSize: isSmall ? 15 : isWebPlatform && isLarge ? 18 : 16,
+      color: colors.textMedium,
+      textAlign: 'center',
+      marginBottom: verticalScale(32),
+      fontWeight: '600',
+      fontStyle: 'italic',
+    },
+
+    teamContainer: {
       flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 12,
-      gap: 12,
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      gap: isSmall ? 16 : 20,
     },
-    factIcon: {
-      fontSize: isSmallScreen ? 28 : 32,
-      lineHeight: isSmallScreen ? 28 : 32,
+
+    teamMember: {
+      width: isWebPlatform && isLarge ? '18%' : isSmall ? '100%' : '47%',
+      minWidth: isSmall ? 280 : 300,
+      maxWidth: isWebPlatform && isLarge ? 220 : '100%',
+      backgroundColor: colors.bgWhite,
+      borderRadius: 20,
+      overflow: 'hidden',
+      elevation: 8,
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 10,
+      borderWidth: 3,
+      borderColor: colors.borderMedium,
+      marginBottom: isSmall ? 16 : 0,
     },
-    factLabel: {
-      fontSize: isSmallScreen ? 17 : isMediumScreen ? 18 : 20,
-      fontWeight: '700',
-      color: '#1b5e20',
-      flex: 1,
+
+    teamImageWrapper: {
+      width: '100%',
+      height: isSmall ? 240 : isWebPlatform && isLarge ? 280 : 260,
+      overflow: 'hidden',
+      backgroundColor: colors.bgLight,
+      borderBottomWidth: 3,
+      borderBottomColor: colors.primaryLight,
+    },
+
+    teamImage: {
+      width: '100%',
+      height: '100%',
+      resizeMode: 'cover',
+    },
+
+    teamName: {
+      fontSize: isSmall ? 17 : 18,
+      fontWeight: '800',
+      color: colors.primary,
+      textAlign: 'center',
+      marginTop: 16,
+      paddingHorizontal: 12,
       letterSpacing: 0.3,
     },
-    factDesc: {
-      fontSize: isSmallScreen ? 14 : 15,
-      fontWeight: '400',
-      color: '#4b5563',
-      lineHeight: isSmallScreen ? 20 : 22,
-      paddingLeft: isSmallScreen ? 40 : 44,
+
+    teamRole: {
+      fontSize: isSmall ? 13 : 14,
+      fontWeight: '700',
+      color: colors.accent,
+      textAlign: 'center',
+      marginTop: 6,
+      marginBottom: 12,
+      paddingHorizontal: 12,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
     },
 
-    // Contact Section
+    teamDesc: {
+      fontSize: isSmall ? 13 : 14,
+      color: colors.textMedium,
+      textAlign: 'center',
+      lineHeight: isSmall ? 19 : 20,
+      paddingHorizontal: 14,
+      paddingBottom: 18,
+      fontWeight: '500',
+    },
+
+    scrollTopButton: {
+      position: 'absolute',
+      right: isSmall ? 16 : 24,
+      bottom: isSmall ? 24 : 32,
+      width: isSmall ? 44 : 52,
+      height: isSmall ? 44 : 52,
+      borderRadius: isSmall ? 22 : 26,
+      backgroundColor: colors.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+      elevation: 6,
+      shadowColor: colors.primaryDark,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.25,
+      shadowRadius: 6,
+      borderWidth: 2,
+      borderColor: colors.primaryLight,
+    },
+
+    scrollTopButtonText: {
+      color: colors.textWhite,
+      fontSize: isSmall ? 18 : 22,
+      fontWeight: '800',
+      marginTop: -2,
+    },
+
+    authMenuWrapper: {
+      position: 'relative',
+      zIndex: 100,
+    },
+
+    authMenuButton: {
+      paddingVertical: isSmall ? 8 : 10,
+      paddingHorizontal: isSmall ? 10 : 14,
+      minWidth: isSmall ? 44 : 50,
+      borderRadius: 20,
+    },
+
+    authDropdown: {
+      position: 'absolute',
+      top: isSmall ? 44 : 50,
+      right: 0,
+      backgroundColor: colors.bgWhite,
+      borderRadius: 12,
+      borderWidth: 2,
+      borderColor: colors.primaryLight,
+      elevation: 8,
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 6,
+      overflow: 'hidden',
+      minWidth: 120,
+    },
+
+    authDropdownItem: {
+      paddingVertical: 12,
+      paddingHorizontal: 14,
+      backgroundColor: colors.bgWhite,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderLight,
+    },
+
+    authDropdownText: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: colors.primary,
+      textAlign: 'left',
+    },
+    
+    // Legacy styles (kept for backward compatibility if needed)
+    featureBlock: {
+      marginBottom: verticalScale(28),
+      backgroundColor: colors.bgWhite,
+      borderRadius: 20,
+      overflow: 'hidden',
+      elevation: 8,
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 10,
+      borderWidth: 3,
+      borderColor: colors.borderMedium,
+      transform: [{ scale: 1 }],
+    },
+    
+    featureImage: {
+      width: '100%',
+      height: isSmall ? 180 : isWebPlatform && isLarge ? 320 : 220,
+      resizeMode: 'cover',
+    },
+    
+    featureText: {
+      fontSize: isSmall ? 15 : 17,
+      color: colors.textMedium,
+      lineHeight: isSmall ? 22 : 26,
+      padding: isSmall ? 18 : 24,
+      textAlign: 'center',
+      fontWeight: '600',
+      backgroundColor: colors.bgLight,
+    },
+
+    
+
+    // ========== CONTACT SECTION ==========
     contactSection: {
-      backgroundColor: '#ffffff',
-      paddingVertical: isSmallScreen ? 28 : 36,
-      paddingHorizontal: isSmallScreen ? 16 : 24,
+      paddingHorizontal: isSmall ? 16 : isWebPlatform && isLarge ? 80 : 24,
+      paddingVertical: verticalScale(40),
+      backgroundColor: colors.primary,
       alignItems: 'center',
     },
+    
     contactTitle: {
-      fontSize: isSmallScreen ? 20 : 22,
-      fontWeight: '700',
-      color: '#1b5e20',
-      marginBottom: 8,
+      fontSize: isSmall ? 24 : isWebPlatform && isLarge ? 36 : 28,
+      fontWeight: '900',
+      color: colors.textWhite,
+      marginBottom: 18,
       textAlign: 'center',
+      textShadowColor: 'rgba(0, 0, 0, 0.3)',
+      textShadowOffset: { width: 2, height: 2 },
+      textShadowRadius: 4,
+      letterSpacing: 0.5,
     },
+    
     contactText: {
-      fontSize: isSmallScreen ? 14 : 15,
-      color: '#374151',
+      fontSize: isSmall ? 14 : 16,
+      color: colors.accentLight,
       textAlign: 'center',
+      lineHeight: isSmall ? 20 : 24,
+      fontWeight: '600',
     },
 
-    // Modal Styles
+    // ========== MODAL ==========
     modalOverlay: {
       flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      backgroundColor: 'rgba(27, 94, 32, 0.75)',
       justifyContent: 'center',
       alignItems: 'center',
-      padding: 16,
+      padding: isSmall ? 16 : 20,
     },
+    
     modalContent: {
-      backgroundColor: '#ffffff',
+      backgroundColor: colors.bgWhite,
       borderRadius: 24,
-      padding: isSmallScreen ? 24 : isMediumScreen ? 28 : 32,
+      padding: isSmall ? 24 : isWebPlatform && isLarge ? 36 : 28,
       width: '100%',
-      maxWidth: 480,
-      maxHeight: '90%',
-      ...Platform.select({
-        ios: {
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.2,
-          shadowRadius: 24,
-        },
-        android: {
-          elevation: 8,
-        },
-      }),
+      maxWidth: isWebPlatform && isLarge ? 520 : 420,
+      maxHeight: isSmall ? '90%' : '85%',
+      elevation: 12,
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.4,
+      shadowRadius: 16,
+      borderWidth: 3,
+      borderColor: colors.primaryLight,
     },
+    
     modalTitle: {
-      fontSize: isSmallScreen ? 24 : isMediumScreen ? 28 : 32,
-      fontWeight: '800',
-      color: '#1b5e20',
+      fontSize: isSmall ? 26 : isWebPlatform && isLarge ? 32 : 28,
+      fontWeight: '900',
+      color: colors.primary,
+      marginBottom: verticalScale(24),
       textAlign: 'center',
-      marginBottom: isSmallScreen ? 20 : 24,
+      textShadowColor: 'rgba(45, 122, 62, 0.15)',
+      textShadowOffset: { width: 1, height: 1 },
+      textShadowRadius: 3,
       letterSpacing: 0.5,
     },
+    
+    input: {
+      borderWidth: 2,
+      borderColor: colors.borderMedium,
+      borderRadius: 16,
+      padding: isSmall ? 14 : 16,
+      fontSize: isSmall ? 15 : 16,
+      marginBottom: 18,
+      backgroundColor: colors.bgLight,
+      color: colors.textDark,
+      fontWeight: '500',
+      elevation: 2,
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+    },
 
-    // Profile Picture Section (Signup)
+    // ========== PROFILE PICTURE SECTION ==========
     profilePictureSection: {
       marginBottom: 24,
       alignItems: 'center',
+      padding: 16,
+      backgroundColor: colors.bgLight,
+      borderRadius: 20,
+      borderWidth: 2,
+      borderColor: colors.borderMedium,
     },
+    
     sectionLabel: {
-      fontSize: isSmallScreen ? 15 : 16,
-      fontWeight: '600',
-      color: '#374151',
+      fontSize: isSmall ? 15 : 16,
+      fontWeight: '700',
+      color: colors.primary,
       marginBottom: 16,
       alignSelf: 'flex-start',
       width: '100%',
+      letterSpacing: 0.3,
     },
+    
     profileImageContainer: {
       position: 'relative',
-      marginBottom: 16,
-      alignItems: 'center',
-      justifyContent: 'center',
+      marginBottom: 20,
     },
+    
     profileImage: {
-      width: 120,
-      height: 120,
-      borderRadius: 60,
-      borderWidth: 3,
-      borderColor: '#1b5e20',
-      backgroundColor: '#f3f4f6',
+      width: isSmall ? 110 : 130,
+      height: isSmall ? 110 : 130,
+      borderRadius: isSmall ? 55 : 65,
+      borderWidth: 4,
+      borderColor: colors.primaryLight,
+      elevation: 6,
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
     },
+    
     placeholderImage: {
-      width: 120,
-      height: 120,
-      borderRadius: 60,
-      backgroundColor: '#e5e7eb',
-      borderWidth: 2,
-      borderColor: '#d1d5db',
-      borderStyle: 'dashed',
-      alignItems: 'center',
+      width: isSmall ? 110 : 130,
+      height: isSmall ? 110 : 130,
+      borderRadius: isSmall ? 55 : 65,
+      backgroundColor: colors.bgGray,
       justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 3,
+      borderColor: colors.borderMedium,
+      borderStyle: 'dashed',
     },
+    
     placeholderText: {
-      fontSize: 14,
-      fontWeight: '500',
-      color: '#9ca3af',
+      fontSize: isSmall ? 13 : 14,
+      color: colors.textLight,
+      fontWeight: '600',
     },
+    
     removeImageButton: {
       position: 'absolute',
-      top: -4,
-      right: -4,
+      top: -8,
+      right: -8,
+      backgroundColor: colors.pink,
       width: 32,
       height: 32,
       borderRadius: 16,
-      backgroundColor: '#ef4444',
-      alignItems: 'center',
       justifyContent: 'center',
+      alignItems: 'center',
+      elevation: 6,
+      shadowColor: colors.pink,
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.4,
+      shadowRadius: 6,
       borderWidth: 2,
-      borderColor: '#ffffff',
-      ...Platform.select({
-        ios: {
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.2,
-          shadowRadius: 4,
-        },
-        android: {
-          elevation: 4,
-        },
-      }),
+      borderColor: colors.bgWhite,
     },
+    
     removeImageText: {
-      color: '#ffffff',
-      fontSize: 20,
-      fontWeight: '700',
-      lineHeight: 20,
+      color: colors.textWhite,
+      fontSize: 22,
+      fontWeight: '900',
+      lineHeight: 22,
     },
-
-    // Image Buttons
+    
     imageButtonsContainer: {
       flexDirection: 'row',
-      gap: 12,
+      gap: 14,
       width: '100%',
       justifyContent: 'center',
     },
+    
     imageButton: {
       flex: 1,
-      paddingVertical: 12,
-      paddingHorizontal: 16,
-      borderRadius: 12,
+      paddingVertical: isSmall ? 12 : 14,
+      paddingHorizontal: isSmall ? 14 : 18,
+      borderRadius: 16,
       alignItems: 'center',
       justifyContent: 'center',
-      borderWidth: 2,
+      elevation: 4,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.2,
+      shadowRadius: 6,
       maxWidth: 150,
-    },
-    galleryButton: {
-      backgroundColor: '#ffffff',
-      borderColor: '#1b5e20',
-    },
-    cameraButton: {
-      backgroundColor: '#1b5e20',
-      borderColor: '#1b5e20',
-    },
-    imageButtonText: {
-      fontSize: 14,
-      fontWeight: '600',
-      color: '#1b5e20',
-    },
-
-    // Input Styles
-    input: {
-      backgroundColor: '#f9fafb',
       borderWidth: 2,
-      borderColor: '#e5e7eb',
-      borderRadius: 12,
-      paddingHorizontal: 16,
-      paddingVertical: isSmallScreen ? 12 : 14,
-      fontSize: isSmallScreen ? 15 : 16,
-      color: '#1f2937',
-      marginBottom: 16,
-      fontWeight: '500',
-      ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : {}),
+    },
+    
+    galleryButton: {
+      backgroundColor: colors.secondary,
+      borderColor: colors.secondaryLight,
+    },
+    
+    cameraButton: {
+      backgroundColor: colors.purple,
+      borderColor: colors.purpleLight,
+    },
+    
+    imageButtonText: {
+      color: colors.textWhite,
+      fontSize: isSmall ? 14 : 15,
+      fontWeight: '700',
+      textShadowColor: 'rgba(0, 0, 0, 0.2)',
+      textShadowOffset: { width: 1, height: 1 },
+      textShadowRadius: 2,
     },
   });
 };

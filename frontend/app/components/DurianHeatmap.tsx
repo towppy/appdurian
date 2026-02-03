@@ -166,7 +166,6 @@ export default function DurianHeatmap({
           north: 22.5    // Top boundary (includes northern islands)
         }
       },
-      height: 500,
       margin: { t: 50, b: 20, l: 20, r: 20 },
       hovermode: 'closest',
       showlegend: false,
@@ -208,7 +207,7 @@ export default function DurianHeatmap({
   };
 
   return (
-    <View style={styles.mapContainer}>
+    <View style={styles.mapCard}>
       {/* Map Controls */}
       <View style={styles.mapControls}>
         <View style={styles.mapTitleSection}>
@@ -237,14 +236,14 @@ export default function DurianHeatmap({
       </View>
 
       {/* Map Container */}
-      <View style={styles.mapContainer}>
+      <View style={styles.mapViewport}>
         {Platform.OS === 'web' ? (
           plotlyLoaded ? (
             <div 
               ref={plotRef} 
               style={{ 
                 width: '100%', 
-                height: '500px',
+                height: '100%',
                 borderRadius: '12px',
                 overflow: 'hidden'
               }} 

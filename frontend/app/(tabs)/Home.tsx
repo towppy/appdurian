@@ -5,6 +5,8 @@ import styles from "../styles/Home.styles";
 import { API_URL } from "../config/appconf";
 import DurianHeatmap, { DURIAN_DATA } from "../components/DurianHeatmap";
 import { RegionDetail, TopProducers } from "../components/RegionDetails";
+import Forum from "./Forum";
+import Footer from '../components/Footer';
 
 import { 
   View, 
@@ -89,6 +91,14 @@ export default function Home() {
         {/* Top Producers Summary */}
         <TopProducers onRegionSelect={setSelectedRegion} />
       </View>
+
+      {/* Forum Section */}
+      <View style={styles.forumEmbed}>
+        <Forum embedded />
+      </View>
+
+      {/* Footer */}
+      <Footer />
     </ScrollView>
   );
 }
