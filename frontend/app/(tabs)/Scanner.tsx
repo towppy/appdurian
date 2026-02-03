@@ -1,999 +1,377 @@
 import React, { useState, useRef, useEffect } from 'react';
-
 import {
-
   View,
-
   Text,
-
   TouchableOpacity,
-
-  StyleSheet,
-
-  Platform,
-
-  Alert,
-
   Image,
-
-  Modal,
-
+  Platform,
   ActivityIndicator,
-
-  Dimensions,
-
   Animated,
-
-  ScrollView,
-
+  Dimensions,
+  Alert,
 } from 'react-native';
-
+import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useScannerStyles } from '../styles/Scanner.styles';
+import { API_URL } from '../config/appconf';
 
-import { CameraView, useCameraPermissions } from 'expo-camera';
-
-import { LinearGradient } from 'expo-linear-gradient';
-
-import { styles } from '../styles/Scanner.styles';
-
-
-
-const isWeb = Platform.OS === 'web';
-
-const { width, height } = Dimensions.get('window');
-
-
-
-interface ScanResult {
-
-  uri: string;
-
-  type: string;
-
-  name?: string;
-
-  size?: number;
-
-  base64?: string;
-
-  width?: number;
-
-  height?: number;
-
-}
-
-
+const { width: screenWidth } = Dimensions.get('window');
 
 export default function Scanner() {
-
-  const [isModalVisible, setIsModalVisible] = useState(false);
-
-  const [isLoading, setIsLoading] = useState(false);
-
-  const [previewUri, setPreviewUri] = useState<string | null>(null);
-
-  const [permission, requestPermission] = useCameraPermissions();
-
-  const cameraRef = useRef<CameraView | null>(null);
-
+  const styles = useScannerStyles();
+  const router = useRouter();
   
-
-  // Animation values
-
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-
-  const scaleAnim = useRef(new Animated.Value(0.9)).current;
-
-  const buttonScale = useRef(new Animated.Value(1)).current;
-
-
-
-  const maxFileSize = 10 * 1024 * 1024;
-
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-
-
-
+  // Camera state
+  const [facing, setFacing] = useState<CameraType>('back');
+  const [permission, requestPermission] = useCameraPermissions();
+  const cameraRef = useRef<CameraView>(null);
+  
+  // UI state
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  
+  // Animation for scan line
+  const scanLineAnim = useRef(new Animated.Value(0)).current;
+  
+  // Animate scan line
   useEffect(() => {
-
-    if (!isWeb && !permission) {
-
-      requestPermission();
-
-    }
-
+    const animateScanLine = () => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(scanLineAnim, {
+            toValue: 1,
+            duration: 2000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scanLineAnim, {
+            toValue: 0,
+            duration: 2000,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    };
     
-
-    // Entrance animation
-
-    Animated.parallel([
-
-      Animated.timing(fadeAnim, {
-
-        toValue: 1,
-
-        duration: 600,
-
-        useNativeDriver: true,
-
-      }),
-
-      Animated.spring(scaleAnim, {
-
-        toValue: 1,
-
-        friction: 8,
-
-        tension: 40,
-
-        useNativeDriver: true,
-
-      }),
-
-    ]).start();
-
-  }, [permission, requestPermission]);
-
-
-
-  const animateButton = () => {
-
-    Animated.sequence([
-
-      Animated.timing(buttonScale, {
-
-        toValue: 0.95,
-
-        duration: 100,
-
-        useNativeDriver: true,
-
-      }),
-
-      Animated.timing(buttonScale, {
-
-        toValue: 1,
-
-        duration: 100,
-
-        useNativeDriver: true,
-
-      }),
-
-    ]).start();
-
-  };
-
-
-
-  const handleWebFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-
-    const file = event.target.files?.[0];
-
-    if (!file) return;
-
-    validateAndProcessFile(file);
-
-    event.target.value = '';
-
-  };
-
-
-
-  const validateAndProcessFile = async (file: File | any) => {
-
-    try {
-
-      if (!allowedTypes.includes(file.type)) {
-
-        throw new Error(`File type not supported. Please use: ${allowedTypes.join(', ')}`);
-
-      }
-
-
-
-      if (file.size > maxFileSize) {
-
-        throw new Error(`File size exceeds ${maxFileSize / (1024 * 1024)}MB limit`);
-
-      }
-
-
-
-      setIsLoading(true);
-
-
-
-      let uri: string;
-
-      let base64Data: string | undefined;
-
-
-
-      if (isWeb && file instanceof File) {
-
-        uri = URL.createObjectURL(file);
-
-        base64Data = await fileToBase64(file);
-
-      } else {
-
-        uri = file.uri || file.path;
-
-        if (file.base64) {
-
-          base64Data = file.base64;
-
-        }
-
-      }
-
-
-
-      const result: ScanResult = {
-
-        uri,
-
-        type: file.type,
-
-        name: file.name || `scan_${Date.now()}`,
-
-        size: file.size,
-
-        base64: base64Data,
-
-      };
-
-
-
-      setPreviewUri(uri);
-
-      setIsModalVisible(false);
-
-      Alert.alert('Success', 'Document scanned successfully');
-
-    } catch (error: any) {
-
-      console.error('Error processing file:', error);
-
-      Alert.alert('Error', error.message || 'Failed to process file');
-
-    } finally {
-
-      setIsLoading(false);
-
-    }
-
-  };
-
-
-
-  const fileToBase64 = (file: File): Promise<string> => {
-
-    return new Promise((resolve, reject) => {
-
-      const reader = new FileReader();
-
-      reader.readAsDataURL(file);
-
-      reader.onload = () => resolve(reader.result as string);
-
-      reader.onerror = error => reject(error);
-
-    });
-
-  };
-
-
-
-  const handleTakePhoto = async () => {
-
-    animateButton();
-
-    
-
-    if (isWeb) {
-
-      const input = document.createElement('input');
-
-      input.type = 'file';
-
-      input.accept = 'image/*';
-
-      input.capture = 'environment';
-
-      
-
-      input.onchange = async (event: Event) => {
-
-        const target = event.target as HTMLInputElement;
-
-        const file = target.files?.[0];
-
-        if (file) {
-
-          validateAndProcessFile(file);
-
-        }
-
-      };
-
-      
-
-      input.click();
-
-      return;
-
-    }
-
-
-
-    if (!permission?.granted) {
-
-      Alert.alert('Permission Required', 'Camera access is required to capture documents');
-
-      await requestPermission();
-
-      return;
-
-    }
-
-
-
-    try {
-
-      const result = await ImagePicker.launchCameraAsync({
-
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-
-        allowsEditing: true,
-
-        aspect: [4, 3],
-
-        quality: 0.8,
-
-      });
-
-
-
-      if (!result.canceled && result.assets[0]) {
-
-        validateAndProcessFile(result.assets[0]);
-
-      }
-
-    } catch (error) {
-
-      console.error('Error launching camera:', error);
-
-      Alert.alert('Error', 'Failed to launch camera');
-
-    }
-
-  };
-
-
-
-  const handleOpenImageLibrary = async () => {
-
-    animateButton();
-
-    
-
-    try {
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-
-        allowsEditing: true,
-
-        aspect: [4, 3],
-
-        quality: 0.8,
-
-      });
-
-
-
-      if (!result.canceled && result.assets[0]) {
-
-        validateAndProcessFile(result.assets[0]);
-
-      }
-
-    } catch (error) {
-
-      console.error('Error opening image library:', error);
-
-      Alert.alert('Error', 'Failed to open image library');
-
-    }
-
-  };
-
-
-
-  const captureWithExpoCamera = async () => {
-
-    if (!cameraRef.current) return;
-
-
-
-    try {
-
-      setIsLoading(true);
-
-      const photo = await cameraRef.current.takePictureAsync({
-
-        quality: 0.8,
-
-        base64: true,
-
-      });
-
-
-
-      if (photo) {
-
-        const result: ScanResult = {
-
-          uri: photo.uri,
-
-          type: 'image/jpeg',
-
-          name: `scan_${Date.now()}.jpg`,
-
-          size: photo.width * photo.height * 4,
-
-          base64: photo.base64,
-
-          width: photo.width,
-
-          height: photo.height,
-
-        };
-
-
-
-        setPreviewUri(photo.uri);
-
-        setIsModalVisible(false);
-
-        Alert.alert('Success', 'Document captured successfully');
-
-      }
-
-    } catch (error) {
-
-      console.error('Error capturing image:', error);
-
-      Alert.alert('Error', 'Failed to capture image');
-
-    } finally {
-
-      setIsLoading(false);
-
-    }
-
-  };
-
-
-
-  const renderCameraView = () => {
-
-    if (!isWeb && permission?.granted) {
-
-      return (
-
-        <View style={styles.cameraContainer}>
-
-          <CameraView
-
-            ref={cameraRef}
-
-            style={styles.cameraPreview}
-
-            facing="back"
-
-            mode="picture"
-
-          />
-
-          <View style={styles.cameraOverlay}>
-
-            <View style={styles.scanFrame} />
-
-          </View>
-
-          <View style={styles.cameraControls}>
-
-            <TouchableOpacity
-
-              style={styles.captureButton}
-
-              onPress={captureWithExpoCamera}
-
-              disabled={isLoading}
-
-            >
-
-              <View style={styles.captureButtonOuter}>
-
-                <View style={styles.captureButtonInner} />
-
-              </View>
-
-            </TouchableOpacity>
-
-          </View>
-
-        </View>
-
-      );
-
-    }
-
-
-
+    animateScanLine();
+  }, []);
+
+  // Handle permission states
+  if (!permission) {
     return (
-
-      <View style={styles.cameraPlaceholder}>
-
-        <Text style={styles.placeholderText}>Camera Unavailable</Text>
-
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#27AE60" />
+        <Text style={styles.permissionText}>Loading camera...</Text>
       </View>
-
     );
+  }
 
+  if (!permission.granted) {
+    return (
+      <View style={styles.center}>
+        <Ionicons name="camera-outline" size={64} color="#27AE60" />
+        <Text style={styles.permissionText}>
+          Camera access is required to scan durians
+        </Text>
+        <TouchableOpacity style={styles.button} onPress={requestPermission}>
+          <Text style={styles.buttonText}>Grant Permission</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  // Take photo with camera
+  const takePicture = async () => {
+    if (!cameraRef.current) return;
+    
+    try {
+      const photo = await cameraRef.current.takePictureAsync({
+        quality: 0.8,
+        base64: false,
+      });
+      
+      if (photo?.uri) {
+        setCapturedImage(photo.uri);
+        analyzeImage(photo.uri);
+      }
+    } catch (error) {
+      console.error('Error taking picture:', error);
+      Alert.alert('Error', 'Failed to capture image. Please try again.');
+    }
   };
 
+  // Pick image from gallery
+  const pickImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
 
+      if (!result.canceled && result.assets[0]) {
+        setCapturedImage(result.assets[0].uri);
+        analyzeImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert('Error', 'Failed to select image. Please try again.');
+    }
+  };
+
+  // Analyze image with backend API
+  const analyzeImage = async (imageUri: string) => {
+    setIsAnalyzing(true);
+    setAnalysisResult(null);
+    
+    try {
+      // Create form data
+      const formData = new FormData();
+      
+      // Handle different platforms
+      if (Platform.OS === 'web') {
+        // For web, fetch the blob
+        const response = await fetch(imageUri);
+        const blob = await response.blob();
+        formData.append('image', blob, 'durian_scan.jpg');
+      } else {
+        // For mobile
+        const filename = imageUri.split('/').pop() || 'durian_scan.jpg';
+        const match = /\.(\w+)$/.exec(filename);
+        const type = match ? `image/${match[1]}` : 'image/jpeg';
+        
+        formData.append('image', {
+          uri: imageUri,
+          name: filename,
+          type,
+        } as any);
+      }
+
+      // Send to backend
+      const response = await fetch(`${API_URL}/scanner/detect`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
+        },
+        body: formData,
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setAnalysisResult(result);
+        // Navigate to results screen with data
+        router.push({
+          pathname: '/DurianScanResult',
+          params: {
+            imageUri: imageUri,
+            result: JSON.stringify(result),
+          },
+        });
+      } else {
+        Alert.alert('Analysis Failed', result.message || 'Could not analyze the image');
+      }
+    } catch (error) {
+      console.error('Error analyzing image:', error);
+      Alert.alert(
+        'Connection Error',
+        'Failed to connect to the analysis server. Please check your connection and try again.'
+      );
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  // Reset scanner
+  const resetScanner = () => {
+    setCapturedImage(null);
+    setAnalysisResult(null);
+    setIsAnalyzing(false);
+  };
+
+  // Toggle camera facing
+  const toggleCameraFacing = () => {
+    setFacing(current => (current === 'back' ? 'front' : 'back'));
+  };
+
+  // Calculate scan line position
+  const scanLineTranslate = scanLineAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 280], // Height of scan frame
+  });
 
   return (
-
     <View style={styles.container}>
-
-      <Animated.View 
-
-        style={[
-
-          styles.content,
-
-          {
-
-            opacity: fadeAnim,
-
-            transform: [{ scale: scaleAnim }],
-
-          }
-
-        ]}
-
+      {/* Camera View */}
+      <CameraView
+        ref={cameraRef}
+        style={styles.camera}
+        facing={facing}
       >
-
-        {/* Header Section */}
-
-        <View style={styles.header}>
-
-          <Text style={styles.title}>Document Scanner</Text>
-
-          <Text style={styles.subtitle}>
-
-            Digitize your documents with professional quality
-
-          </Text>
-
-        </View>
-
-
-
-        {/* Main Action Button */}
-
-        <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
-
+        {/* Overlay */}
+        <View style={styles.overlay}>
+          {/* Back Button */}
           <TouchableOpacity
-
-            style={styles.scanButton}
-
-            onPress={() => {
-
-              animateButton();
-
-              setIsModalVisible(true);
-
-            }}
-
-            disabled={isLoading}
-
-            activeOpacity={0.8}
-
+            style={styles.backButton}
+            onPress={() => router.back()}
           >
-
-            <LinearGradient
-
-              colors={['#2563eb', '#1d4ed8']}
-
-              start={{ x: 0, y: 0 }}
-
-              end={{ x: 1, y: 1 }}
-
-              style={styles.gradientButton}
-
-            >
-
-              {isLoading ? (
-
-                <ActivityIndicator color="#fff" size="small" />
-
-              ) : (
-
-                <>
-
-                  <View style={styles.scanIcon}>
-
-                    <View style={styles.scanIconLine} />
-
-                    <View style={[styles.scanIconLine, styles.scanIconLineBottom]} />
-
-                  </View>
-
-                  <Text style={styles.scanButtonText}>Start New Scan</Text>
-
-                </>
-
-              )}
-
-            </LinearGradient>
-
+            <Ionicons name="arrow-back" size={20} color="#333" />
+            <Text style={styles.backText}> Back</Text>
           </TouchableOpacity>
 
-        </Animated.View>
-
-
-
-        {/* Preview Section */}
-
-        {previewUri && (
-
-          <Animated.View 
-
-            style={styles.previewContainer}
-
-            entering="fadeIn"
-
+          {/* Flip Camera Button */}
+          <TouchableOpacity
+            style={[styles.backButton, { left: 'auto', right: 20 }]}
+            onPress={toggleCameraFacing}
           >
+            <Ionicons name="camera-reverse-outline" size={24} color="#333" />
+          </TouchableOpacity>
 
-            <View style={styles.previewHeader}>
+          {/* Scan Frame with AR effect */}
+          <View style={styles.scanOverlay}>
+            <View style={styles.scanFrame}>
+              {/* Corner markers */}
+              <View style={[styles.corner, styles.cornerTopLeft]} />
+              <View style={[styles.corner, styles.cornerTopRight]} />
+              <View style={[styles.corner, styles.cornerBottomLeft]} />
+              <View style={[styles.corner, styles.cornerBottomRight]} />
 
-              <Text style={styles.previewTitle}>Recent Scan</Text>
-
-              <TouchableOpacity
-
-                style={styles.removeButton}
-
-                onPress={() => setPreviewUri(null)}
-
-              >
-
-                <Text style={styles.removeButtonText}>✕</Text>
-
-              </TouchableOpacity>
-
-            </View>
-
-            <View style={styles.imageWrapper}>
-
-              <Image 
-
-                source={{ uri: previewUri }} 
-
-                style={styles.previewImage}
-
-                resizeMode="cover"
-
+              {/* Animated scan line */}
+              <Animated.View
+                style={[
+                  styles.scanLine,
+                  {
+                    transform: [{ translateY: scanLineTranslate }],
+                  },
+                ]}
               />
 
-              <View style={styles.imageOverlay}>
-
-                <Text style={styles.imageLabel}>Preview</Text>
-
+              {/* Grid lines */}
+              <View style={styles.gridContainer}>
+                <View style={[styles.gridLineHorizontal, { top: '33%' }]} />
+                <View style={[styles.gridLineHorizontal, { top: '66%' }]} />
+                <View style={[styles.gridLineVertical, { left: '33%' }]} />
+                <View style={[styles.gridLineVertical, { left: '66%' }]} />
               </View>
-
             </View>
 
-          </Animated.View>
-
-        )}
-
-
-
-        {/* Features Section */}
-
-        <View style={styles.featuresContainer}>
-
-          <View style={styles.featureCard}>
-
-            <View style={styles.featureIcon}>
-
-              <Text style={styles.featureIconText}>📄</Text>
-
+            {/* Instructions */}
+            <View style={styles.instructionsContainer}>
+              <Text style={styles.instructionsText}>
+                🥭 Position durian in frame
+              </Text>
+              <Text style={styles.instructionsSubtext}>
+                Ensure good lighting for best results
+              </Text>
             </View>
-
-            <Text style={styles.featureTitle}>High Quality</Text>
-
-            <Text style={styles.featureDescription}>Professional grade scanning</Text>
-
           </View>
 
-          
-
-          <View style={styles.featureCard}>
-
-            <View style={styles.featureIcon}>
-
-              <Text style={styles.featureIconText}>⚡</Text>
-
+          {/* Preview of last captured image */}
+          {capturedImage && (
+            <View style={styles.previewContainer}>
+              <Image source={{ uri: capturedImage }} style={styles.previewImage} />
+              {isAnalyzing && (
+                <View style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: 'rgba(0,0,0,0.5)',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                  <ActivityIndicator size="small" color="#27AE60" />
+                </View>
+              )}
             </View>
+          )}
 
-            <Text style={styles.featureTitle}>Fast Process</Text>
-
-            <Text style={styles.featureDescription}>Instant digitization</Text>
-
-          </View>
-
-          
-
-          <View style={styles.featureCard}>
-
-            <View style={styles.featureIcon}>
-
-              <Text style={styles.featureIconText}>🔒</Text>
-
-            </View>
-
-            <Text style={styles.featureTitle}>Secure</Text>
-
-            <Text style={styles.featureDescription}>Protected storage</Text>
-
-          </View>
-
-        </View>
-
-      </Animated.View>
-
-
-
-      {/* Modal */}
-
-      <Modal
-
-        visible={isModalVisible}
-
-        animationType="slide"
-
-        transparent={true}
-
-        onRequestClose={() => setIsModalVisible(false)}
-
-      >
-
-        <View style={styles.modalContainer}>
-
-          <TouchableOpacity 
-
-            style={styles.modalBackdrop}
-
-            activeOpacity={1}
-
-            onPress={() => setIsModalVisible(false)}
-
-          />
-
-          
-
-          <View style={styles.modalContent}>
-
-            <View style={styles.modalHandle} />
-
-            
-
-            <View style={styles.modalHeader}>
-
-              <Text style={styles.modalTitle}>Scan Document</Text>
-
-              <TouchableOpacity 
-
-                onPress={() => setIsModalVisible(false)}
-
-                style={styles.closeButton}
-
-              >
-
-                <Text style={styles.closeButtonText}>✕</Text>
-
-              </TouchableOpacity>
-
-            </View>
-
-
-
-            <ScrollView 
-
-              style={styles.optionsContainer}
-
-              showsVerticalScrollIndicator={false}
-
+          {/* Bottom Controls */}
+          <View style={{
+            position: 'absolute',
+            bottom: Platform.OS === 'ios' ? 40 : 30,
+            left: 0,
+            right: 0,
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: 20,
+          }}>
+            {/* Gallery Button */}
+            <TouchableOpacity
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.9)',
+                padding: 14,
+                borderRadius: 30,
+              }}
+              onPress={pickImage}
+              disabled={isAnalyzing}
             >
+              <Ionicons name="images-outline" size={28} color="#333" />
+            </TouchableOpacity>
 
-              {isWeb ? (
-
-                <View style={styles.webInputWrapper}>
-
-                  <input
-
-                    type="file"
-
-                    id="web-file-input"
-
-                    accept={allowedTypes.join(',')}
-
-                    onChange={handleWebFileUpload}
-
-                    style={{ display: 'none' }}
-
-                  />
-
-                  <label htmlFor="web-file-input" style={{ width: '100%' }}>
-
-                    <View style={styles.optionButton}>
-
-                      <View style={styles.optionIconContainer}>
-
-                        <Text style={styles.optionIcon}>📷</Text>
-
-                      </View>
-
-                      <View style={styles.optionTextContainer}>
-
-                        <Text style={styles.optionButtonText}>Capture Document</Text>
-
-                        <Text style={styles.optionButtonSubtext}>
-
-                          Use your camera to scan
-
-                        </Text>
-
-                      </View>
-
-                      <Text style={styles.optionArrow}>›</Text>
-
-                    </View>
-
-                  </label>
-
-                </View>
-
+            {/* Capture Button */}
+            <TouchableOpacity
+              style={[
+                styles.captureButton,
+                isAnalyzing && { opacity: 0.6 },
+                { position: 'relative', bottom: 0, marginHorizontal: 0 },
+              ]}
+              onPress={takePicture}
+              disabled={isAnalyzing}
+            >
+              {isAnalyzing ? (
+                <ActivityIndicator size="small" color="#fff" />
               ) : (
-
-                <>
-
-                  <TouchableOpacity
-
-                    style={styles.optionButton}
-
-                    onPress={handleTakePhoto}
-
-                    disabled={isLoading}
-
-                    activeOpacity={0.7}
-
-                  >
-
-                    <View style={styles.optionIconContainer}>
-
-                      <Text style={styles.optionIcon}>📷</Text>
-
-                    </View>
-
-                    <View style={styles.optionTextContainer}>
-
-                      <Text style={styles.optionButtonText}>Take Photo</Text>
-
-                      <Text style={styles.optionButtonSubtext}>
-
-                        Capture using camera
-
-                      </Text>
-
-                    </View>
-
-                    <Text style={styles.optionArrow}>›</Text>
-
-                  </TouchableOpacity>
-
-
-
-                  <TouchableOpacity
-
-                    style={styles.optionButton}
-
-                    onPress={handleOpenImageLibrary}
-
-                    disabled={isLoading}
-
-                    activeOpacity={0.7}
-
-                  >
-
-                    <View style={styles.optionIconContainer}>
-
-                      <Text style={styles.optionIcon}>🖼️</Text>
-
-                    </View>
-
-                    <View style={styles.optionTextContainer}>
-
-                      <Text style={styles.optionButtonText}>Choose from Gallery</Text>
-
-                      <Text style={styles.optionButtonSubtext}>
-
-                        Select existing image
-
-                      </Text>
-
-                    </View>
-
-                    <Text style={styles.optionArrow}>›</Text>
-
-                  </TouchableOpacity>
-
-                </>
-
+                <Text style={styles.captureText}>📷 Scan</Text>
               )}
+            </TouchableOpacity>
 
-
-
-              {!isWeb && permission?.granted && (
-
-                <View style={styles.cameraSection}>
-
-                  <Text style={styles.sectionTitle}>Live Camera Preview</Text>
-
-                  {renderCameraView()}
-
-                </View>
-
-              )}
-
-            </ScrollView>
-
-
-
-            {isLoading && (
-
-              <View style={styles.loadingOverlay}>
-
-                <View style={styles.loadingCard}>
-
-                  <ActivityIndicator size="large" color="#2563eb" />
-
-                  <Text style={styles.loadingText}>Processing Document...</Text>
-
-                </View>
-
-              </View>
-
+            {/* Reset Button (if image captured) */}
+            {capturedImage && (
+              <TouchableOpacity
+                style={{
+                  backgroundColor: 'rgba(255,255,255,0.9)',
+                  padding: 14,
+                  borderRadius: 30,
+                }}
+                onPress={resetScanner}
+                disabled={isAnalyzing}
+              >
+                <Ionicons name="refresh-outline" size={28} color="#333" />
+              </TouchableOpacity>
             )}
-
           </View>
-
         </View>
+      </CameraView>
 
-      </Modal>
-
+      {/* Loading Overlay */}
+      {isAnalyzing && (
+        <View style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.7)',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 100,
+        }}>
+          <ActivityIndicator size="large" color="#27AE60" />
+          <Text style={{ color: '#fff', marginTop: 16, fontSize: 18, fontWeight: '600' }}>
+            🔍 Analyzing durian...
+          </Text>
+          <Text style={{ color: '#ccc', marginTop: 8, fontSize: 14 }}>
+            Please wait while AI processes the image
+          </Text>
+        </View>
+      )}
     </View>
-
   );
-
 }

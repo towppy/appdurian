@@ -6,10 +6,12 @@ venv310/
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
 
 # Environment variables (SECURITY!)
 .env
 *.env
+.env.local
 
 # Node.js
 frontend/node_modules/
@@ -18,14 +20,34 @@ npm-debug.log*
 # IDE
 .vscode/
 .idea/
+*.swp
 
 # OS
 .DS_Store
 Thumbs.db
 
-#dataset
+# Dataset (too large)
 datasets/
 *.h5
 *.pb
 *.tflite
+
+# Trained Models (large files)
+models/*.pt
+models/*.onnx
+models/*.pth
 models/trained_*
+!models/.gitkeep
+
+# Training outputs
+training_scripts/runs/
+training_scripts/*.pt
+training_scripts/wandb/
+
+# Logs
+*.log
+logs/
+
+# Temp files
+*.tmp
+tmp/

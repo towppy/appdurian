@@ -21,6 +21,7 @@ import { router } from "expo-router";
 import { API_URL } from "./config/appconf"; 
 import { useLandingStyles } from "./styles/LandingScreen.styles";
 import * as ImagePicker from 'expo-image-picker';
+import Footer from './components/Footer';
 
 export default function Landing() {
   const [authModalVisible, setAuthModalVisible] = useState(false);
@@ -33,6 +34,8 @@ export default function Landing() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedImage, setSelectedImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [authDropdownVisible, setAuthDropdownVisible] = useState(false);
 
   const { width, height } = useWindowDimensions();
   const isWeb = Platform.OS === "web";
@@ -42,7 +45,7 @@ export default function Landing() {
   const scrollRef = useRef<ScrollView | null>(null);
   const flatListRef = useRef<FlatList<any> | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const [anchors, setAnchors] = useState({ home: 0, about: 0, services: 0, contact: 0 });
+  const [anchors, setAnchors] = useState({ home: 0, about: 0, contact: 0 });
 
   const carouselData = [
     {
@@ -65,7 +68,7 @@ export default function Landing() {
     },
   ];
 
-  // Image picker functions
+  // Image picker function
   const pickImage = async () => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -322,6 +325,11 @@ export default function Landing() {
     return () => stopAutoScroll();
   }, [width]);
 
+  const handleScroll = (event: any) => {
+    const yOffset = event.nativeEvent?.contentOffset?.y ?? 0;
+    setShowScrollTop(yOffset > 200);
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
@@ -329,6 +337,8 @@ export default function Landing() {
         style={styles.container}
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       >
         {/* HEADER */}
         <View style={styles.header}>
@@ -342,22 +352,37 @@ export default function Landing() {
           </View>
     
           <View style={styles.headerRight}>
-            <TouchableOpacity
-              style={[styles.button, styles.primaryButton, { minWidth: isSmallScreen ? 80 : 100, paddingVertical: isSmallScreen ? 8 : 10 }]}
-              onPress={() => openAuthModal("login")}
-            >
-              <Text style={[styles.buttonText, styles.primaryButtonText, { fontSize: isSmallScreen ? 14 : 15 }]}>
-                Login
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.button, styles.secondaryButton, { minWidth: isSmallScreen ? 80 : 100, paddingVertical: isSmallScreen ? 8 : 10 }]}
-              onPress={() => openAuthModal("signup")}
-            >
-              <Text style={[styles.buttonText, styles.secondaryButtonText, { fontSize: isSmallScreen ? 14 : 15 }]}>
-                Sign Up
-              </Text>
-            </TouchableOpacity>
+            <View style={styles.authMenuWrapper}>
+              <TouchableOpacity
+                style={[styles.button, styles.primaryButton, styles.authMenuButton]}
+                onPress={() => setAuthDropdownVisible(!authDropdownVisible)}
+              >
+                <Text style={[styles.buttonText, styles.primaryButtonText, { fontSize: 14 }]}>⋯</Text>
+              </TouchableOpacity>
+
+              {authDropdownVisible && (
+                <View style={styles.authDropdown}>
+                  <TouchableOpacity
+                    style={styles.authDropdownItem}
+                    onPress={() => {
+                      setAuthDropdownVisible(false);
+                      openAuthModal("login");
+                    }}
+                  >
+                    <Text style={styles.authDropdownText}>Login</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.authDropdownItem}
+                    onPress={() => {
+                      setAuthDropdownVisible(false);
+                      openAuthModal("signup");
+                    }}
+                  >
+                    <Text style={styles.authDropdownText}>Sign Up</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
           </View>
         </View>
 
@@ -370,9 +395,6 @@ export default function Landing() {
               </TouchableOpacity>
               <TouchableOpacity style={styles.navItem} onPress={() => scrollRef.current?.scrollTo({ y: anchors.about, animated: true })}>
                 <Text style={styles.navText}>About Us</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.navItem} onPress={() => scrollRef.current?.scrollTo({ y: anchors.services, animated: true })}>
-                <Text style={styles.navText}>Services</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.navItem} onPress={() => scrollRef.current?.scrollTo({ y: anchors.contact, animated: true })}>
                 <Text style={styles.navText}>Contact</Text>
@@ -447,16 +469,6 @@ export default function Landing() {
                   Get Started
                 </Text>
               </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.button, styles.secondaryButton, loading && styles.disabledButton]}
-                onPress={() => openAuthModal("signup")}
-                disabled={loading}
-              >
-                <Text style={[styles.buttonText, styles.secondaryButtonText]}>
-                  Learn More
-                </Text>
-              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -464,92 +476,98 @@ export default function Landing() {
 
         {/* About Us */}
         <View style={styles.infoSection} onLayout={(e) => { const y = e.nativeEvent?.layout?.y ?? 0; setAnchors(prev => ({ ...prev, about: y })); }}>
-          <Text style={styles.sectionTitle}>Why Choose Durianostics?</Text>
+          <Text style={styles.sectionTitle}>About Us</Text>
+          <Text style={styles.aboutSubtitle}>Meet the team behind Durianostics</Text>
 
-          <View style={styles.featureBlock}>
-            <Image
-              source={require("../assets/images/feature1.jpg")}
-              style={styles.featureImage}
-            />
-            <Text style={styles.featureText}>
-              Fast and accurate AI analysis for growers, sellers, and exporters.
-            </Text>
-          </View>
+          <View style={styles.teamContainer}>
+            <View style={styles.teamMember}>
+              <View style={styles.teamImageWrapper}>
+                <Image
+                  source={require("../assets/images/aia.jpg")}
+                  style={styles.teamImage}
+                />
+              </View>
+              <Text style={styles.teamName}>Garcia, Aia A.</Text>
+              <Text style={styles.teamRole}>Group Leader</Text>
+              <Text style={styles.teamDesc}>
+                Leading expert in agricultural AI with 15+ years developing machine learning solutions for crop analysis.
+              </Text>
+            </View>
 
-          <View style={styles.featureBlock}>
-            <Image
-              source={require("../assets/images/feature2.jpg")}
-              style={styles.featureImage}
-            />
-            <Text style={styles.featureText}>
-              Detect early signs of damage and disease before it's too late.
-            </Text>
-          </View>
+            <View style={styles.teamMember}>
+              <View style={styles.teamImageWrapper}>
+                <Image
+                  source={require("../assets/images/feature2.jpg")}
+                  style={styles.teamImage}
+                />
+              </View>
+              <Text style={styles.teamName}>Piad, Carl Evan T.</Text>
+              <Text style={styles.teamRole}>Member 1</Text>
+              <Text style={styles.teamDesc}>
+                Third-generation durian farmer with deep knowledge of quality standards and export regulations.
+              </Text>
+            </View>
 
-          <View style={styles.featureBlock}>
-            <Image
-              source={require("../assets/images/feature3.jpg")}
-              style={styles.featureImage}
-            />
-            <Text style={styles.featureText}>
-              Export‑ready quality standards at your fingertips.
-            </Text>
+            <View style={styles.teamMember}>
+              <View style={styles.teamImageWrapper}>
+                <Image
+                  source={require("../assets/images/kat.jpg")}
+                  style={styles.teamImage}
+                />
+              </View>
+              <Text style={styles.teamName}>Priol, Kathleen Mae R.</Text>
+              <Text style={styles.teamRole}>Member 2</Text>
+              <Text style={styles.teamDesc}>
+                Former agricultural tech consultant helping farmers adopt cutting-edge solutions for better yields.
+              </Text>
+            </View>
+
+            <View style={styles.teamMember}>
+              <View style={styles.teamImageWrapper}>
+                <Image
+                  source={require("../assets/images/kevin.png")}
+                  style={styles.teamImage}
+                />
+              </View>
+              <Text style={styles.teamName}>Ofracio, Kevin R.</Text>
+              <Text style={styles.teamRole}>Member 3</Text>
+              <Text style={styles.teamDesc}>
+                Full-stack developer specializing in mobile apps and real-time image processing systems.
+              </Text>
+            </View>
+
+            <View style={styles.teamMember}>
+              <View style={styles.teamImageWrapper}>
+                <Image
+                  source={require("../assets/images/feature2.jpg")}
+                  style={styles.teamImage}
+                />
+              </View>
+              <Text style={styles.teamName}>Mrs. Pops V. Madriaga</Text>
+              <Text style={styles.teamRole}>Adviser</Text>
+              <Text style={styles.teamDesc}>
+                Connecting durian exporters with international markets through technology-driven quality assurance.
+              </Text>
+            </View>
           </View>
         </View>
 
 
-        {/* FACTS SECTION */}
-        <View style={styles.factsSection}onLayout={(e) => { const y = e.nativeEvent?.layout?.y ?? 0; setAnchors(prev => ({ ...prev, services: y })); }}>
-          <Text style={styles.factsTitle}>Did You Know?</Text>
-          
-          <View style={styles.factCard}>
-            <View style={styles.factHeader}>
-              <Text style={styles.factIcon}>👑</Text>
-              <Text style={styles.factLabel}>King of Fruits</Text>
-            </View>
-            <Text style={styles.factDesc}>
-              Durian is hailed as the "King of Fruits" in Southeast Asia due to its formidable thorn-covered husk and distinctive size.
-            </Text>
-          </View>
+       
 
-          <View style={styles.factCard}>
-            <View style={styles.factHeader}>
-              <Text style={styles.factIcon}>🚫</Text>
-              <Text style={styles.factLabel}>Banned in Public</Text>
-            </View>
-            <Text style={styles.factDesc}>
-              Due to its overpowering smell, durian is banned in many airports, hotels, and public trains across Asia, including Singapore and Japan.
-            </Text>
-          </View>
-
-          <View style={styles.factCard}>
-            <View style={styles.factHeader}>
-              <Text style={styles.factIcon}>💪</Text>
-              <Text style={styles.factLabel}>Nutrient Powerhouse</Text>
-            </View>
-            <Text style={styles.factDesc}>
-              Despite the smell, it is rich in iron, Vitamin C, and potassium, improving muscle strength and skin health.
-            </Text>
-          </View>
-
-          <View style={styles.factCard}>
-            <View style={styles.factHeader}>
-              <Text style={styles.factIcon}>🇵🇭</Text>
-              <Text style={styles.factLabel}>The "Puyat" Variety</Text>
-            </View>
-            <Text style={styles.factDesc}>
-              The Philippines is famous for the "Puyat" durian, known for its sweet, creamy taste and milder odor compared to other varieties.
-            </Text>
-          </View>
-        </View>
-
-        {/* CONTACT SECTION */}
-        <View style={styles.contactSection} onLayout={(e) => { const y = e.nativeEvent?.layout?.y ?? 0; setAnchors(prev => ({ ...prev, contact: y })); }}>
-          <Text style={styles.contactTitle}>Contact Us</Text>
-          <Text style={styles.contactText}>Email: support@durianostics.example • Phone: +1 555-1234</Text>
-        </View>
+        {/* FOOTER */}
+        <Footer />
 
       </ScrollView>
+
+      {showScrollTop && (
+        <TouchableOpacity
+          style={styles.scrollTopButton}
+          onPress={() => scrollRef.current?.scrollTo({ y: 0, animated: true })}
+        >
+          <Text style={styles.scrollTopButtonText}>↑</Text>
+        </TouchableOpacity>
+      )}
 
       {/* AUTH MODAL */}
       <Modal

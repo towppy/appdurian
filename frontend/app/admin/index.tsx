@@ -3,18 +3,25 @@ import {
   View, 
   Text, 
   ActivityIndicator, 
-  StyleSheet, 
   TouchableOpacity, 
   Alert, 
-  ScrollView 
+  ScrollView,
+  Platform,
+  Dimensions,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { Picker } from '@react-native-picker/picker'; // Kailangan itong import
 import { API_URL } from '../config/appconf';
+import styles from '../styles/adminstyles/index.styles';
+
+
+const { width } = Dimensions.get('window');
+const isMobile = width < 768;
 
 interface User {
   _id: string;
+  id: string;
   name: string;
   email: string;
   role: string;
@@ -26,6 +33,7 @@ const AdminDashboard = () => {
   const [statusData, setStatusData] = useState<{ message: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [users, setUsers] = useState<User[]>([]);
+  const [showDeactivated, setShowDeactivated] = useState(false);
 
   useEffect(() => {
     fetchStatus();
@@ -68,7 +76,12 @@ const AdminDashboard = () => {
         return res.json();
       })
       .then((data) => {
-        setUsers(data.users);
+        // Normalize backend response: convert 'id' to '_id'
+        const normalizedUsers = data.users.map((user: any) => ({
+          ...user,
+          _id: user._id || user.id
+        }));
+        setUsers(normalizedUsers);
         setError(null);
       })
       .catch((err) => {
@@ -134,33 +147,60 @@ const AdminDashboard = () => {
       });
   };
 
-  const deleteUser = (userId: string) => {
-    // Nagdagdag ng Confirmation Alert para hindi aksidente
-    Alert.alert(
-      "Confirm Delete",
-      "Are you sure you want to delete this user? This cannot be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        { 
-          text: "Delete", 
-          style: "destructive", 
-          onPress: () => {
-            fetch(`${API_URL}/admin/users/${userId}`, {
-              method: 'DELETE',
-              headers: { 'ngrok-skip-browser-warning': 'true' }
-            })
-              .then((res) => res.json())
-              .then((data) => {
-                if (data.success) {
-                  Alert.alert("Success", "User deleted.");
-                  fetchUsers();
-                }
-              })
-              .catch((err) => console.error("Delete Error:", err));
-          }
+  const reactivateUser = (userId: string) => {
+    fetch(`${API_URL}/admin/users/${userId}/activate`, {
+      method: 'PUT',
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+      }
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          Alert.alert("Success", "User reactivated.");
+          fetchUsers();
+        } else {
+          Alert.alert("Error", data.error || "Failed to reactivate user.");
         }
-      ]
-    );
+      })
+      .catch((err) => {
+        console.error("Reactivate User Error:", err);
+        Alert.alert("Error", "Failed to reactivate user.");
+      });
+  };
+
+  const deleteUser = (userId: string) => {
+    console.log("Delete button pressed with userId:", userId);
+    
+    // Direct delete without alert confirmation
+    console.log("API_URL:", API_URL);
+    const url = `${API_URL}/admin/users/${userId}`;
+    console.log("Fetching:", url);
+    fetch(url, {
+      method: 'DELETE',
+      headers: { 
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
+      }
+    })
+      .then((res) => {
+        console.log("Delete response status:", res.status);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        console.log("Delete response:", data);
+        if (data.success) {
+          Alert.alert("Success", "User deleted.");
+          fetchUsers();
+        } else {
+          Alert.alert("Error", data.error || "Failed to delete user.");
+        }
+      })
+      .catch((err) => {
+        console.error("Delete Error:", err);
+        Alert.alert("Error", "Failed to delete user: " + err.message);
+      });
   };
 
   if (loading && users.length === 0) {
@@ -173,37 +213,55 @@ const AdminDashboard = () => {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Admin Dashboard</Text>
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-          <Text style={styles.logoutBtnText}>Logout</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>System Status</Text>
-        <View style={styles.statusRow}>
-          <View style={[styles.statusIndicator, { backgroundColor: error ? 'red' : '#4caf50' }]} />
-          <Text style={styles.statusText}>
-            {error ? "Backend Offline" : statusData?.message || "Online"}
-          </Text>
-        </View>
-        {error && (
-          <TouchableOpacity style={styles.retryBtn} onPress={fetchStatus}>
-            <Text style={styles.retryBtnText}>Retry Connection</Text>
+    <View style={{ flex: 1, flexDirection: isMobile ? 'column' : 'row' }}>
+     
+      
+      <ScrollView 
+        style={[
+          styles.container,
+          isMobile ? {} : { marginLeft: 240 }
+        ]}
+        contentContainerStyle={isMobile ? undefined : { paddingBottom: 40 }}
+      >
+        <View style={styles.header}>
+          <Text style={styles.title}>Dashboard</Text>
+          <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+            <Text style={styles.logoutBtnText}>Logout</Text>
           </TouchableOpacity>
-        )}
-      </View>
+        </View>
 
-      <Text style={styles.welcomeText}>Welcome, Administrator!</Text>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>System Status</Text>
+          <View style={styles.statusRow}>
+            <View style={[styles.statusIndicator, { backgroundColor: error ? 'red' : '#4caf50' }]} />
+            <Text style={styles.statusText}>
+              {error ? "Backend Offline" : statusData?.message || "Online"}
+            </Text>
+          </View>
+          {error && (
+            <TouchableOpacity style={styles.retryBtn} onPress={fetchStatus}>
+              <Text style={styles.retryBtnText}>Retry Connection</Text>
+            </TouchableOpacity>
+          )}
+        </View>
 
-      <View style={[styles.card, { marginBottom: 40 }]}>
-        <Text style={styles.cardTitle}>User Management</Text>
-        {users.length === 0 ? (
-          <Text style={styles.emptyText}>No users found.</Text>
+        <Text style={styles.welcomeText}>Welcome, Administrator!</Text>
+
+        <View style={[styles.card, { marginBottom: 40 }]}>
+          <Text style={styles.cardTitle}>User Management</Text>
+          <TouchableOpacity
+            style={[styles.retryBtn, { alignSelf: 'flex-start', marginTop: 10 }]}
+            onPress={() => setShowDeactivated((prev) => !prev)}
+          >
+            <Text style={styles.retryBtnText}>
+              {showDeactivated ? 'Hide Deactivated' : 'Show Deactivated'}
+            </Text>
+          </TouchableOpacity>
+
+          {(showDeactivated ? users : users.filter((u) => u.isActive !== false)).length === 0 ? (
+            <Text style={styles.emptyText}>No users found.</Text>
         ) : (
-          users.map((user) => (
+          (showDeactivated ? users : users.filter((u) => u.isActive !== false)).map((user) => (
             <View key={user._id} style={styles.userRow}>
               <View style={styles.userInfo}>
                 <Text style={styles.userName}>{user.name}</Text>
@@ -230,72 +288,29 @@ const AdminDashboard = () => {
                   </Picker>
                 </View>
 
-                <TouchableOpacity 
-                  onPress={() => deleteUser(user._id)} 
-                  style={styles.deleteBtn}
-                >
-                  <Text style={styles.deleteBtnText}>Delete</Text>
-                </TouchableOpacity>
+                {user.isActive === false ? (
+                  <TouchableOpacity 
+                    onPress={() => reactivateUser(user._id)} 
+                    style={styles.retryBtn}
+                  >
+                    <Text style={styles.retryBtnText}>Reactivate</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity 
+                    onPress={() => deleteUser(user._id)} 
+                    style={styles.deleteBtn}
+                  >
+                    <Text style={styles.deleteBtnText}>Deactivate</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
           ))
         )}
-      </View>
-    </ScrollView>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#f9f9f9' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30, marginTop: 40 },
-  title: { fontSize: 26, fontWeight: 'bold', color: '#1b5e20' },
-  logoutBtn: { backgroundColor: '#e53935', paddingHorizontal: 15, paddingVertical: 8, borderRadius: 8 },
-  logoutBtnText: { color: '#fff', fontWeight: 'bold' },
-  card: { backgroundColor: '#fff', padding: 20, borderRadius: 12, elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, marginBottom: 20 },
-  cardTitle: { fontSize: 18, fontWeight: '600', marginBottom: 15, color: '#333' },
-  statusRow: { flexDirection: 'row', alignItems: 'center' },
-  statusIndicator: { width: 12, height: 12, borderRadius: 6, marginRight: 10 },
-  statusText: { fontSize: 16, color: '#666' },
-  welcomeText: { marginTop: 10, marginBottom: 20, fontSize: 16, color: '#888', fontStyle: 'italic', textAlign: 'center' },
-  centeredContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  retryBtn: { marginTop: 15, backgroundColor: '#1b5e20', padding: 10, borderRadius: 5, alignItems: 'center' },
-  retryBtnText: { color: '#fff', fontWeight: '500' },
-  
-  // User Management Styles
-  userRow: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
-    alignItems: 'center', 
-    paddingVertical: 15, 
-    borderBottomWidth: 1, 
-    borderBottomColor: '#eee' 
-  },
-  userInfo: { flex: 1 },
-  userName: { fontSize: 16, fontWeight: 'bold', color: '#333' },
-  userEmail: { fontSize: 13, color: '#777' },
-  userActions: { flexDirection: 'row', alignItems: 'center' },
-  pickerWrapper: {
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    marginRight: 10,
-    width: 140,
-    height: 40,
-    justifyContent: 'center',
-  },
-  picker: {
-    width: '100%',
-    color: '#333',
-  },
-  deleteBtn: {
-    backgroundColor: '#ffebee',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e53935',
-  },
-  deleteBtnText: { color: '#e53935', fontWeight: 'bold', fontSize: 13 },
-  emptyText: { textAlign: 'center', color: '#999', padding: 20 },
-});
 
 export default AdminDashboard;

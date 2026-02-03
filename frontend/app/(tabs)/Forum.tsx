@@ -53,7 +53,11 @@ interface Comment {
   created_at: string;
 }
 
-export default function Forum() {
+interface ForumProps {
+  embedded?: boolean;
+}
+
+export default function Forum({ embedded = false }: ForumProps) {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [showNewPostModal, setShowNewPostModal] = useState(false);
@@ -85,7 +89,12 @@ export default function Forum() {
       const url = `${API_URL}/forum/posts?category=${selectedCategory}&search=${searchQuery}`;
       console.log('[CLIENT] fetchPosts url:', url);
 
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+          'Accept': 'application/json',
+        }
+      });
       console.log('[CLIENT] fetchPosts status:', response.status, response.headers.get('content-type'));
 
       const contentType = response.headers.get('content-type') || '';
@@ -117,7 +126,12 @@ export default function Forum() {
   const fetchComments = async (postId: string) => {
     try {
       setLoadingComments(true);
-      const response = await fetch(`${API_URL}/forum/posts/${postId}/comments`);
+      const response = await fetch(`${API_URL}/forum/posts/${postId}/comments`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+          'Accept': 'application/json',
+        }
+      });
       const data = await response.json();
       
       if (data.success) {
@@ -149,6 +163,7 @@ export default function Forum() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
         },
         body: JSON.stringify({
           post_id: selectedPost._id,
@@ -211,6 +226,8 @@ export default function Forum() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+          "Accept": "application/json"
         },
         body: JSON.stringify(payload),
       });
@@ -257,6 +274,7 @@ export default function Forum() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
         },
         body: JSON.stringify({ user_id: userId }),
       });
@@ -288,6 +306,7 @@ export default function Forum() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
         },
         body: JSON.stringify({ user_id: userId }),
       });
@@ -383,8 +402,10 @@ export default function Forum() {
 
       <ScrollView 
         style={styles.container}
+        scrollEnabled={!embedded}
+        nestedScrollEnabled={!embedded}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          embedded ? undefined : <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
         {/* Search and Filters */}

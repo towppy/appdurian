@@ -119,36 +119,28 @@ export default function UniversalHeader({
         )}
       </View>
 
-      {/* Right Section - Notifications and Profile */}
-      <View style={styles.rightSection}>
-        {showNotifications && !title && (
-          <>
-            <TouchableOpacity 
-              style={styles.notificationButton}
-              onPress={() => navigateToScreen('Profile')}
-            >
-              <Ionicons name="notifications-outline" size={24} color="#333" />
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.profileButton}
-              onPress={() => navigateToScreen('Profile')}
-            >
-              {user?.photoProfile ? (
-                <Image 
-                  source={{ uri: getCloudinaryUrl(user.photoProfile) }}
-                  style={styles.profileAvatar}
-                />
-              ) : (
-                <View style={styles.profileAvatarPlaceholder}>
-                  <Text style={styles.profileAvatarText}>
-                    {user?.name ? getInitials(user.name) : 'US'}
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          </>
-        )}
-      </View>
+      {/* Right Section - Profile only */}
+<View style={styles.rightSection}>
+  {showNotifications && !title && (
+    <TouchableOpacity 
+      style={styles.profileButton}
+      onPress={() => navigateToScreen('Profile')}
+    >
+      {user?.photoProfile ? (
+        <Image 
+          source={{ uri: getCloudinaryUrl(user.photoProfile) }}
+          style={styles.profileAvatar}
+        />
+      ) : (
+        <View style={styles.profileAvatarPlaceholder}>
+          <Text style={styles.profileAvatarText}>
+            {user?.name ? getInitials(user.name) : 'US'}
+          </Text>
+        </View>
+      )}
+    </TouchableOpacity>
+  )}
+</View>
     </View>
   );
 }
