@@ -35,6 +35,15 @@ export function UserProvider({ children }: UserProviderProps) {
       const storedPublicId = await AsyncStorage.getItem('photoPublicId');
       const storedRole = await AsyncStorage.getItem('user_role');
 
+      console.log('[UserContext] Loaded from AsyncStorage:', {
+        storedId,
+        storedName,
+        storedEmail,
+        storedPhoto,
+        storedPublicId,
+        storedRole,
+      });
+
       if (storedId) {
         setUser({
           id: storedId,
