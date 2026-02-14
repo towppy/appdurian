@@ -8,6 +8,7 @@ const sidebarItems = [
 	{ label: 'Dashboard', route: '/admin' as const, icon: 'grid-outline' as const },
 	{ label: 'Users', route: '/admin/UserManage' as const, icon: 'people-outline' as const },
 	{ label: 'Shop', route: '/admin/AdminShop' as const, icon: 'cart-outline' as const },
+	{ label: 'Product Management', route: '/admin/ProductManagement' as const, icon: 'pricetags-outline' as const },
 	{ label: 'Analytics', route: '/admin/GenAnalytics' as const, icon: 'analytics-outline' as const },
 ];
 

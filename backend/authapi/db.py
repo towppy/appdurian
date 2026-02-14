@@ -45,6 +45,9 @@ ACCESS_TOKEN_EXPIRE_HOURS = int(os.getenv("ACCESS_TOKEN_EXPIRE_HOURS", 24))
 # Helper functions
 # ---------------------------
 
+def get_db():
+    return db
+
 def set_logged_in(user_id: str, is_logged_in: bool):
     """Update the user's login status."""
     users_collection.update_one(

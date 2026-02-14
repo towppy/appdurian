@@ -24,42 +24,7 @@ type Product = {
   isNew?: boolean;
 };
 
-const DUMMY_PRODUCTS: Product[] = [
-  {
-    id: "1",
-    name: "Musang King Premium",
-    category: "Fresh Fruit",
-    price: 1850,
-    image: require("../../assets/images/durian-bg.jpg"),
-    description: "The gold standard of durians. Creamy, bittersweet, and incredibly rich flavor.",
-    isNew: true,
-  },
-  {
-    id: "2",
-    name: "Golden Durian Chips",
-    category: "Snacks",
-    price: 450,
-    image: require("../../assets/images/durian-bg1.jpg"),
-    description: "Vacuum-fried to preserve the intense natural flavor and crunch.",
-  },
-  {
-    id: "3",
-    name: "Artisan Durian Spread",
-    category: "Pantry",
-    price: 320,
-    image: require("../../assets/images/durian-bg2.jpg"),
-    description: "Hand-crafted with 100% real pulp. Perfect for toasts and desserts.",
-  },
-  {
-    id: "4",
-    name: "D24 Traditional Harvest",
-    category: "Fresh Fruit",
-    price: 1250,
-    image: require("../../assets/images/feature1.jpg"),
-    description: "Balanced sweetness with a smooth, custard-like texture. A classic favorite.",
-    isNew: true,
-  },
-];
+const API_URL = 'http://localhost:8000'; // Update if using ngrok
 
 export default function Shop() {
   const [loading, setLoading] = useState(true);
@@ -71,11 +36,29 @@ export default function Shop() {
   });
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setProducts(DUMMY_PRODUCTS);
-      setLoading(false);
-    }, 800);
-    return () => clearTimeout(timer);
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`${API_URL}/products`);
+        const data = await res.json();
+        // Map backend products to frontend Product type
+        const mapped = data.map((p: any) => ({
+          id: p._id,
+          name: p.name,
+          category: p.category,
+          price: p.price,
+          image: p.image ? { uri: p.image } : require("../../assets/images/durian-bg.jpg"),
+          description: p.description,
+          isNew: p.isNew || false,
+        }));
+        setProducts(mapped);
+      } catch (err) {
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
   }, []);
 
   if (loading) {
@@ -142,7 +125,7 @@ export default function Shop() {
                   <View style={shopStyles.priceRow}>
                     <View style={shopStyles.priceContainer}>
                       <Text style={shopStyles.priceLabel}>Price</Text>
-                      <Text style={shopStyles.price}>₱{product.price.toLocaleString()}</Text>
+                      <Text style={shopStyles.price}>₱{typeof product.price === 'number' ? product.price.toLocaleString() : product.price ? String(product.price) : '0'}</Text>
                     </View>
 
                     <TouchableOpacity

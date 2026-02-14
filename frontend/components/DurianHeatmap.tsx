@@ -185,7 +185,7 @@ export default function DurianHeatmap(props: HeatmapProps) {
       displayModeBar: true,
       displaylogo: false,
       modeBarButtonsToRemove: ['lasso2d', 'select2d'],
-      ***REMOVED***
+      
       // Set view constraints
       scrollZoom: true,
       doubleClick: 'reset+autosize'
