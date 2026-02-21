@@ -9,6 +9,7 @@ import uuid
 # Use local YOLO model (your trained model)
 from ai.yolo_detector import get_yolo_detector
 from ai.durian_color import get_durian_color
+from ai.durian_desease import get_durian_disease
 from handlers.cloudinary_handler import CloudinaryScan
 from db import (
     save_scan, get_user_scans, get_scan_by_id, delete_scan,
@@ -157,14 +158,74 @@ def detect_durians():
 # ---------------------------
 # Disease Routes
 # ---------------------------
-
 @scanner_bp.route("/classify/disease", methods=["POST", "OPTIONS"])
 @cross_origin(origin="*", headers=["Content-Type", "Authorization", "X-Requested-With", "ngrok-skip-browser-warning", "X-User-Id"])
 def classify_disease():
     if request.method == "OPTIONS":
         return '', 200
-    return jsonify({"success": False, "error": "Not implemented", "message": "Disease classification coming soon."}), 501
 
+    try:
+        if 'image' not in request.files:
+            return jsonify({"success": False, "error": "No image provided"}), 400
+
+        image_file = request.files['image']
+        if image_file.filename == '':
+            return jsonify({"success": False, "error": "No file selected"}), 400
+
+        allowed_extensions = {'jpg', 'jpeg', 'png', 'bmp', 'gif', 'webp'}
+        file_ext = image_file.filename.rsplit('.', 1)[1].lower() if '.' in image_file.filename else ''
+
+        if file_ext not in allowed_extensions:
+            return jsonify({"success": False, "error": "Invalid file type"}), 400
+
+        max_size = 10 * 1024 * 1024
+        image_file.seek(0, 2)
+        file_size = image_file.tell()
+        image_file.seek(0)
+
+        if file_size > max_size:
+            return jsonify({"success": False, "error": "File too large"}), 400
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=f'.{file_ext}') as tmp:
+            image_file.save(tmp.name)
+            temp_path = tmp.name
+
+        result = get_durian_disease(temp_path)
+
+        os.unlink(temp_path)
+
+        # ---- map disease from detections ----
+        disease = "healthy"
+        detections = result.get("detections", [])
+
+        for det in detections:
+            if det.get("class_name") == "rot":
+                disease = "rot"
+                break
+            if det.get("class_name") == "mold":
+                disease = "mold"
+                break
+
+        return jsonify({
+            "success": True,
+            "disease": disease,
+            "detections": detections,
+            "total_detections": len(detections),
+            "request_info": {
+                "filename": image_file.filename,
+                "file_size": file_size,
+                "file_type": file_ext,
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        })
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(type(e).__name__),
+            "message": str(e)
+        }), 500
+        
 # ---------------------------
 # History / Scan / Analytics Routes
 # ---------------------------
