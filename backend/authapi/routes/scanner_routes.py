@@ -169,6 +169,7 @@ def classify_disease():
             return jsonify({"success": False, "error": "No image provided"}), 400
 
         image_file = request.files['image']
+
         if image_file.filename == '':
             return jsonify({"success": False, "error": "No file selected"}), 400
 
@@ -190,25 +191,30 @@ def classify_disease():
             image_file.save(tmp.name)
             temp_path = tmp.name
 
+        # 🔥 Run your disease model
         result = get_durian_disease(temp_path)
 
         os.unlink(temp_path)
 
-        # ---- map disease from detections ----
-        disease = "healthy"
+        if not result.get("success"):
+            return jsonify(result), 500
+
         detections = result.get("detections", [])
 
-        for det in detections:
-            if det.get("class_name") == "rot":
-                disease = "rot"
-                break
-            if det.get("class_name") == "mold":
-                disease = "mold"
-                break
+        # ✅ If model detects nothing → assume healthy
+        if len(detections) == 0:
+            predicted_disease = "healthy"
+            confidence = 0.0
+        else:
+            # ✅ Get highest confidence detection
+            best_detection = max(detections, key=lambda x: x.get("confidence", 0))
+            predicted_disease = best_detection.get("class_name", "unknown")
+            confidence = best_detection.get("confidence", 0)
 
         return jsonify({
             "success": True,
-            "disease": disease,
+            "disease": predicted_disease,
+            "confidence": confidence,
             "detections": detections,
             "total_detections": len(detections),
             "request_info": {
@@ -225,7 +231,6 @@ def classify_disease():
             "error": str(type(e).__name__),
             "message": str(e)
         }), 500
-        
 # ---------------------------
 # History / Scan / Analytics Routes
 # ---------------------------

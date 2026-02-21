@@ -37,29 +37,22 @@ def get_durian_disease(image_path: str, model_path: Optional[str] = None) -> Dic
     """
     Detect durian diseases using YOLOv8
 
-    Returns:
-        {
-            success: bool,
-            detections: [
-                {
-                    class_name,
-                    confidence,
-                    bbox
-                }
-            ]
-        }
+    Classes:
+        0 = mold
+        1 = rot
+        2 = healthy
     """
 
     try:
         model = load_disease_model(model_path)
-
         results = model(image_path, verbose=False)
 
         detections = []
+        best_detection = None  # highest confidence detection
 
         for r in results:
             boxes = r.boxes
-            names = r.names  # class id to name mapping
+            names = r.names
 
             if boxes is None:
                 continue
@@ -67,17 +60,38 @@ def get_durian_disease(image_path: str, model_path: Optional[str] = None) -> Dic
             for box in boxes:
                 class_id = int(box.cls[0])
                 confidence = float(box.conf[0])
-                bbox = box.xyxy[0].tolist()  # [x1, y1, x2, y2]
+                bbox = box.xyxy[0].tolist()
 
-                detections.append({
+                class_name = names[class_id]
+
+                detection_data = {
                     "class_id": class_id,
-                    "class_name": names[class_id],
+                    "class_name": class_name,
                     "confidence": round(confidence, 4),
                     "bbox": [float(x) for x in bbox]
-                })
+                }
+
+                detections.append(detection_data)
+
+                # Track highest confidence detection
+                if best_detection is None or confidence > best_detection["confidence"]:
+                    best_detection = {
+                        "class_name": class_name,
+                        "confidence": confidence
+                    }
+
+        # Decide final disease label
+        if best_detection:
+            final_disease = best_detection["class_name"]
+            final_confidence = round(best_detection["confidence"], 4)
+        else:
+            final_disease = "healthy"
+            final_confidence = 0.0
 
         return {
             "success": True,
+            "disease": final_disease,  # 👈 IMPORTANT for frontend
+            "confidence": final_confidence,
             "total_detections": len(detections),
             "detections": detections
         }
