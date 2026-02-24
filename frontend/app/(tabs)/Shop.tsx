@@ -20,6 +20,7 @@ import { useUser } from '@/contexts/UserContext';
 import { useCart } from '@/contexts/CartContext';
 
 
+
 type Product = {
   id: string;
   name: string;
