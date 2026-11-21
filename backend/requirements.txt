@@ -1,0 +1,17 @@
+Flask
+Flask-Cors
+Flask-Mail
+cloudinary
+fpdf
+numpy
+passlib[argon2,bcrypt]
+Pillow
+pymongo
+python-dotenv
+python-jose[cryptography]
+requests
+roboflow
+timm
+torch
+torchvision
+ultralytics
